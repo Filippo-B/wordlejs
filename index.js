@@ -29,6 +29,7 @@ function getColorFromCSS(name) {
   title.textContent = 'Wordle'
   title.style.fontFamily = '"Roboto Slab", serif'
   title.style.fontSize = '38px'
+  title.style.fontWeight = '700'
   header.insertAdjacentElement('afterbegin', title)
 
   /* =================================== § WORDLE CONTAINER === */
