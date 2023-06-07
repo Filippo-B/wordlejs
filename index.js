@@ -40,19 +40,24 @@ function getColorFromCSS(name) {
 
   const wordleContiner = document.createElement('div')
   wordleContiner.style.display = 'grid'
-  wordleContiner.style.gridTemplateColumns = 'repeat(5, 62px)'
   wordleContiner.style.gridTemplateRows = 'repeat(6, 62px)'
   wordleContiner.style.gap = '5px'
 
 
   /* =================================== § ROWS AND COLS === */
   for (let i = 0; i < ROWS; i++) {
+    const row = document.createElement('div')
+    row.style.display = 'grid'
+    row.style.gridTemplateColumns = 'repeat(5, 62px)'
+    row.style.gap = '5px'
+    wordleContiner.insertAdjacentElement('beforeend', row)
+
     for (let j = 0; j < COLS; j++) {
       const col = document.createElement('div')
       col.style.width = '100%'
       col.style.height = '100%'
       col.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
-      wordleContiner.insertAdjacentElement('beforeend', col)
+      row.insertAdjacentElement('beforeend', col)
     }
   }
   wordleSection.insertAdjacentElement('afterbegin', wordleContiner)
