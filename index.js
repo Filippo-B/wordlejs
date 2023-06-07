@@ -59,13 +59,19 @@ function getColorFromCSS(name) {
       wordleContiner.insertAdjacentElement('beforeend', row)
 
       for (let j = 0; j < COLS; j++) {
-        const col = document.createElement('div')
-        col.style.width = '100%'
-        col.style.height = '100%'
-        col.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
-        col.textContent = wordTracker[i][j]
-        col.setAttribute('data-box', `${i},${j}`)
-        row.insertAdjacentElement('beforeend', col)
+        const box = document.createElement('div')
+        box.style.width = '100%'
+        box.style.height = '100%'
+        box.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
+        box.style.display = 'flex'
+        box.style.justifyContent = 'center'
+        box.style.alignItems = 'center'
+        box.style.textTransform = 'uppercase'
+        box.style.fontSize = '2rem'
+
+        box.textContent = wordTracker[i][j]
+        box.setAttribute('data-box', `${i},${j}`)
+        row.insertAdjacentElement('beforeend', box)
       }
     }
     wordleSection.insertAdjacentElement('afterbegin', wordleContiner)

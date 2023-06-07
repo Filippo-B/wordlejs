@@ -32,6 +32,7 @@
 body {
   background-color: var(--black);
   color: var(--color-tone-11);
+  font-family: 'Rubik', Arial, Helvetica, sans-serif;
 }
 
 .square {
