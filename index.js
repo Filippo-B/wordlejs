@@ -97,6 +97,18 @@ function getColorFromCSS(name) {
       const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
       boxElement.textContent = e.key.toUpperCase()
       boxElement.style.border = `2px solid ${getColorFromCSS('--color-tone-3')}`
+
+      const feedbackAnimation = [
+        { transform: 'scale(1.1)' },
+        { transform: 'scale(1)' },
+      ]
+
+      const feedbackAnimationTiming = {
+        duration: 100,
+        iterations: 1
+      }
+
+      boxElement.animate(feedbackAnimation, 50)
     }
   }
 
