@@ -3,6 +3,9 @@ const root = document.getElementById('root');
 const WORD = 'PANIC';
 const ROWS = 6;
 const COLS = 5;
+const CURRENT_ROW = 0
+const wordTracker = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
+console.log(wordTracker)
 
 function getColorFromCSS(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name)
@@ -46,20 +49,65 @@ function getColorFromCSS(name) {
 
 
   /* =================================== § ROWS AND COLS === */
-  for (let i = 0; i < ROWS; i++) {
-    const row = document.createElement('div')
-    row.style.display = 'grid'
-    row.style.gridTemplateColumns = 'repeat(5, 62px)'
-    row.style.gap = '5px'
-    wordleContiner.insertAdjacentElement('beforeend', row)
+  function generateColumns() {
 
-    for (let j = 0; j < COLS; j++) {
-      const col = document.createElement('div')
-      col.style.width = '100%'
-      col.style.height = '100%'
-      col.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
-      row.insertAdjacentElement('beforeend', col)
+    for (let i = 0; i < ROWS; i++) {
+      const row = document.createElement('div')
+      row.style.display = 'grid'
+      row.style.gridTemplateColumns = 'repeat(5, 62px)'
+      row.style.gap = '5px'
+      wordleContiner.insertAdjacentElement('beforeend', row)
+
+      for (let j = 0; j < COLS; j++) {
+        const col = document.createElement('div')
+        col.style.width = '100%'
+        col.style.height = '100%'
+        col.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
+        col.textContent = wordTracker[i][j]
+        col.setAttribute('data-box', `${i},${j}`)
+        row.insertAdjacentElement('beforeend', col)
+      }
+    }
+    wordleSection.insertAdjacentElement('afterbegin', wordleContiner)
+  }
+  generateColumns()
+
+  /* =================================== § TYPING === */
+  window.addEventListener('keydown', (e) => {
+    console.log(e.key)
+    if (isValidLetter(e.key)) {
+      addLetter(e)
+      // generateColumns()
+    } else if (e.key === 'Backspace') {
+      removeLetter(e)
+    }
+  })
+
+  function addLetter(e) {
+    const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
+    if (firstEmptySpace !== -1) {
+      wordTracker[CURRENT_ROW][firstEmptySpace] = e.key
+      console.log(`[data-box="${CURRENT_ROW},${firstEmptySpace}]`)
+      const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
+      boxElement.textContent = e.key.toUpperCase()
     }
   }
-  wordleSection.insertAdjacentElement('afterbegin', wordleContiner)
+
+  function removeLetter(e) {
+    const lastLetter = wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
+
+    if (lastLetter !== -1) {
+      wordTracker[CURRENT_ROW][lastLetter] = ''
+      const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${lastLetter}"]`)
+      boxElement.textContent = ''
+    }
+
+  }
+
+  /* ============================================ */
+  /* ··········································· § UTILS ··· */
+  /* ======================================== */
+  function isValidLetter(letter) {
+    return /^[a-z]{1}$/i.test(letter)
+  }
 })()
