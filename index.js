@@ -103,11 +103,6 @@ function getColorFromCSS(name) {
         { transform: 'scale(1)' },
       ]
 
-      const feedbackAnimationTiming = {
-        duration: 100,
-        iterations: 1
-      }
-
       boxElement.animate(feedbackAnimation, 50)
     }
   }
