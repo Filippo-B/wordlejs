@@ -13,6 +13,10 @@
   --color-tone-11: #dfdfdf;
   --color-tone-12: #dfdfdf;
   --color-nav-hover: #2f2f31;
+  --green: #6aaa64;
+  --darkendGreen: #538d4e;
+  --yellow: #c9b458;
+  --darkendYellow: #b59f3b;
   --color-present: var(--darkendYellow);
   --color-correct: var(--darkendGreen);
   --color-absent: var(--color-tone-4);
