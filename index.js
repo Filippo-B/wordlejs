@@ -78,7 +78,9 @@ function getColorFromCSS(name) {
   }
   generateColumns()
 
-  /* =================================== § TYPING === */
+  /* ============================================ */
+  /* ··········································· § TYPING ··· */
+  /* ======================================== */
   window.addEventListener('keydown', (e) => {
     console.log(e.key)
     if (isValidLetter(e.key)) {
@@ -116,7 +118,6 @@ function getColorFromCSS(name) {
       boxElement.textContent = ''
       boxElement.style.border = `2px solid ${getColorFromCSS('--color-absent')}`
     }
-
   }
 
   /* ============================================ */
