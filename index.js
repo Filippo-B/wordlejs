@@ -91,6 +91,9 @@ function getColorFromCSS(name) {
     }
   })
 
+  /**
+   * Adds a letter to the first empty box of the active row.
+   */
   function addLetter(e) {
     const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
     if (firstEmptySpace !== -1) {
@@ -109,6 +112,9 @@ function getColorFromCSS(name) {
     }
   }
 
+  /**
+   * Removes the last letter of the active row.
+   */
   function removeLetter(e) {
     const lastLetter = wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
 
