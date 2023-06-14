@@ -1,6 +1,8 @@
 'use strict'
+import { wordleLa } from './wordleLa.js'
+import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
-const WORD = 'PANIC';
+const WORD = 'panic';
 const ROWS = 6;
 const COLS = 5;
 const CURRENT_ROW = 0
@@ -77,6 +79,7 @@ function generateGrid() {
     row.style.display = 'grid'
     row.style.gridTemplateColumns = 'repeat(5, 62px)'
     row.style.gap = '5px'
+    row.setAttribute('data-row', i)
     wordleContainer.insertAdjacentElement('beforeend', row)
 
     for (let j = 0; j < COLS; j++) {
@@ -108,6 +111,9 @@ window.addEventListener('keydown', (e) => {
     addLetter(e)
   } else if (e.key === 'Backspace') {
     removeLetter(e)
+  } else if (e.key === 'Enter') {
+    const currentWord = wordTracker[CURRENT_ROW].join('')
+    resultFeedback(checkWord(currentWord))
   }
 })
 
@@ -115,6 +121,7 @@ window.addEventListener('keydown', (e) => {
  * Adds a letter to the first empty box of the active row.
  */
 function addLetter(e) {
+
   const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
   if (firstEmptySpace !== -1) {
     wordTracker[CURRENT_ROW][firstEmptySpace] = e.key
@@ -140,6 +147,49 @@ function removeLetter(e) {
   }
 }
 
+const checkWordResult = {
+  win: 'win',
+  exist: 'exist',
+  doNotExist: 'doNotExist'
+}
+
+function checkWord(word) {
+  if (typeof (word) !== 'string') throw Error('word must be a string.')
+  if (word.length !== 5) return ''
+
+  if (word === WORD) return checkWordResult.win
+  if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.exist
+  else return checkWordResult.doNotExist
+}
+
+function colorFeedback(letter, i) {
+  if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
+  if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
+  return 'gray'
+
+}
+
+function resultFeedback(result) {
+  const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
+  const boxes = currentRowEl.querySelectorAll('div')
+
+  if (result === checkWordResult.doNotExist) {
+    currentRowEl.animate(errorFeedbackAnimation, 300)
+  } else {
+    for (let i in boxes) {
+      const currentBox = boxes[i]
+      const currentLetter = currentBox.textContent.toLowerCase()
+      currentBox.style.backgroundColor = colorFeedback(currentLetter, i)
+      currentBox.style.borderColor = colorFeedback(currentLetter, i)
+    }
+    CURRENT_ROW++
+  }
+
+  if (result === checkWordResult.win) {
+    console.log('game ends')
+  }
+}
+
 /* ============================================ */
 /* ··········································· § UTILS ··· */
 /* ======================================== */
@@ -158,6 +208,17 @@ function isValidLetter(letter) {
 const pressKeyFeedbackAnimation = [
   { transform: 'scale(1.1)' },
   { transform: 'scale(1)' },
+]
+
+const errorFeedbackAnimation = [
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(0)' },
+
 ]
 
 /**
