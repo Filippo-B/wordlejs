@@ -188,19 +188,32 @@ function colorFeedback(letter, i) {
  * Change the background color of the boxes based on wherther a letter is correct / present / absent.
  * @param {string} wordStatus - Whether the word is correct, present or not present
  */
-function boxFeedback(wordStatus) {
+async function boxFeedback(wordStatus) {
   const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
   const boxes = currentRowEl.querySelectorAll('div')
 
   if (wordStatus === checkWordResult.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
   } else {
-    boxes.forEach((box, i) => {
-
+    function animate(i) {
+      const box = boxes[i]
+      console.log(box)
+      if (!box) return
       const currentLetter = box.textContent?.toLowerCase()
-      box.style.backgroundColor = colorFeedback(currentLetter, i)
-      box.style.borderColor = colorFeedback(currentLetter, i)
-    })
+      const an = box.animate(scaleToZeroAnimation, { duration: 300, fill: 'forwards' })
+      an.play()
+
+      an.onfinish = () => {
+        box.style.backgroundColor = colorFeedback(currentLetter, i)
+        box.style.borderColor = colorFeedback(currentLetter, i)
+        box.animate(scaleBack, { duration: 300, fill: 'forwards' })
+        animate(i + 1)
+      }
+    }
+
+    animate(0)
+
+
     CURRENT_ROW++
   }
   if (wordStatus === checkWordResult.correct) {
@@ -236,6 +249,15 @@ const errorFeedbackAnimation = [
   { transform: 'translateX(-4px)' },
   { transform: 'translateX(+4px)' },
   { transform: 'translateX(0)' },
+]
+
+const scaleToZeroAnimation = [
+  { transform: 'scaleY(100%)' },
+  { transform: 'scaleY(0)' },
+]
+
+const scaleBack = [
+  { transform: 'scaleY(100%)' },
 
 ]
 
