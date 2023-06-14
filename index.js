@@ -5,7 +5,8 @@ const root = document.getElementById('root');
 const WORD = 'panic';
 const ROWS = 6;
 const COLS = 5;
-const CURRENT_ROW = 0
+let CURRENT_ROW = 0
+let GAME_STATE = 'PLAY'
 const wordTracker = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
 console.log(wordTracker)
 
@@ -107,13 +108,15 @@ generateGrid()
 /* ======================================== */
 window.addEventListener('keydown', (e) => {
   console.log(e.key)
-  if (isValidLetter(e.key)) {
-    addLetter(e)
-  } else if (e.key === 'Backspace') {
-    removeLetter(e)
-  } else if (e.key === 'Enter') {
-    const currentWord = wordTracker[CURRENT_ROW].join('')
-    resultFeedback(checkWord(currentWord))
+  if (GAME_STATE === 'PLAY') {
+    if (isValidLetter(e.key)) {
+      addLetter(e)
+    } else if (e.key === 'Backspace') {
+      removeLetter(e)
+    } else if (e.key === 'Enter') {
+      const currentWord = wordTracker[CURRENT_ROW].join('')
+      boxFeedback(checkWord(currentWord))
+    }
   }
 })
 
@@ -121,7 +124,8 @@ window.addEventListener('keydown', (e) => {
  * Adds a letter to the first empty box of the active row.
  */
 function addLetter(e) {
-
+  // const row = () => CURRENT_ROW
+  // console.log(row())
   const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
   if (firstEmptySpace !== -1) {
     wordTracker[CURRENT_ROW][firstEmptySpace] = e.key
@@ -148,45 +152,59 @@ function removeLetter(e) {
 }
 
 const checkWordResult = {
-  win: 'win',
-  exist: 'exist',
-  doNotExist: 'doNotExist'
+  correct: 'correc',
+  present: 'present',
+  notPresent: 'notPresent'
 }
 
+/**
+ * Check if the word is correct or not.
+ * @param {string} word - The word to check.
+ * @returns {string} Correct, present or notPresent
+ */
 function checkWord(word) {
   if (typeof (word) !== 'string') throw Error('word must be a string.')
   if (word.length !== 5) return ''
 
-  if (word === WORD) return checkWordResult.win
-  if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.exist
-  else return checkWordResult.doNotExist
+  if (word === WORD) return checkWordResult.correct
+  if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.present
+  else return checkWordResult.notPresent
 }
 
+/**
+ * Checks a letter and output the appropriate color if it's present in WORD.
+ * @param {string} letter - The letter to check.
+ * @param {number} i - The index.
+ * @returns {string} - The color.
+ */
 function colorFeedback(letter, i) {
   if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
   if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
-  return 'gray'
+  return getColorFromCSSVar('--color-absent')
 
 }
 
-function resultFeedback(result) {
+/**
+ * Change the background color of the boxes based on wherther a letter is correct / present / absent.
+ * @param {string} wordStatus - Whether the word is correct, present or not present
+ */
+function boxFeedback(wordStatus) {
   const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
   const boxes = currentRowEl.querySelectorAll('div')
 
-  if (result === checkWordResult.doNotExist) {
+  if (wordStatus === checkWordResult.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
   } else {
-    for (let i in boxes) {
-      const currentBox = boxes[i]
-      const currentLetter = currentBox.textContent.toLowerCase()
-      currentBox.style.backgroundColor = colorFeedback(currentLetter, i)
-      currentBox.style.borderColor = colorFeedback(currentLetter, i)
-    }
+    boxes.forEach((box, i) => {
+
+      const currentLetter = box.textContent?.toLowerCase()
+      box.style.backgroundColor = colorFeedback(currentLetter, i)
+      box.style.borderColor = colorFeedback(currentLetter, i)
+    })
     CURRENT_ROW++
   }
-
-  if (result === checkWordResult.win) {
-    console.log('game ends')
+  if (wordStatus === checkWordResult.correct) {
+    GAME_STATE = 'END'
   }
 }
 
