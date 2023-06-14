@@ -123,7 +123,12 @@ function getColorFromCSS(name) {
   /* ============================================ */
   /* ··········································· § UTILS ··· */
   /* ======================================== */
+  /**
+   * Check if a string is a letter between a-z or A-Z and if the string consists of only one letter.
+   * @param {string} letter - The string to check. It should have a length of 1.
+   * @returns {boolean} True or false
+   */
   function isValidLetter(letter) {
-    return /^[a-z]{1}$/i.test(letter)
+    return /^[a-z]{1}$/i.test(letter) && letter.length === 1
   }
 })()
