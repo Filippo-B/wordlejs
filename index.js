@@ -65,7 +65,6 @@ function createWordleContainer() {
   wordleContainerEl.id = 'wordleContainer'
   wordleSectionEl.insertAdjacentElement('afterbegin', wordleContainerEl)
   wordleContainer = document.getElementById('wordleContainer')
-
 }
 createWordleContainer()
 
@@ -163,8 +162,8 @@ const checkWordResult = {
  * @returns {string} Correct, present or notPresent
  */
 function checkWord(word) {
+  word = word.trim()
   if (typeof (word) !== 'string') throw Error('word must be a string.')
-  if (word.length !== 5) return ''
 
   if (word === WORD) return checkWordResult.correct
   if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.present
@@ -181,7 +180,6 @@ function colorFeedback(letter, i) {
   if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
   if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
   return getColorFromCSSVar('--color-absent')
-
 }
 
 /**
@@ -212,8 +210,6 @@ async function boxFeedback(wordStatus) {
     }
 
     animate(0)
-
-
     CURRENT_ROW++
   }
   if (wordStatus === checkWordResult.correct) {
