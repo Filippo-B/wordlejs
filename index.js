@@ -18,8 +18,6 @@ let wordleSection = null
 /* ··········································· § HEADER ··· */
 /* ======================================== */
 
-/* =================================== § HEADER CONTAINER === */
-
 /**
  * Create the header.
  */
@@ -102,22 +100,6 @@ function generateGrid() {
 }
 generateGrid()
 
-/* ============================================ */
-/* ··········································· § TYPING ··· */
-/* ======================================== */
-window.addEventListener('keydown', (e) => {
-  console.log(e.key)
-  if (GAME_STATE === 'PLAY') {
-    if (isValidLetter(e.key)) {
-      addLetter(e)
-    } else if (e.key === 'Backspace') {
-      removeLetter(e)
-    } else if (e.key === 'Enter') {
-      const currentWord = wordTracker[CURRENT_ROW].join('')
-      boxFeedback(checkWord(currentWord))
-    }
-  }
-})
 
 /**
  * Adds a letter to the first empty box of the active row.
@@ -195,8 +177,9 @@ async function boxFeedback(wordStatus) {
   } else {
     function animate(i) {
       const box = boxes[i]
-      console.log(box)
+
       if (!box) return
+
       const currentLetter = box.textContent?.toLowerCase()
       const an = box.animate(scaleToZeroAnimation, { duration: 300, fill: 'forwards' })
       an.play()
@@ -216,6 +199,23 @@ async function boxFeedback(wordStatus) {
     GAME_STATE = 'END'
   }
 }
+
+/* ============================================ */
+/* ··········································· § TYPING ··· */
+/* ======================================== */
+window.addEventListener('keydown', (e) => {
+  console.log(e.key)
+  if (GAME_STATE === 'PLAY') {
+    if (isValidLetter(e.key)) {
+      addLetter(e)
+    } else if (e.key === 'Backspace') {
+      removeLetter(e)
+    } else if (e.key === 'Enter') {
+      const currentWord = wordTracker[CURRENT_ROW].join('')
+      boxFeedback(checkWord(currentWord))
+    }
+  }
+})
 
 /* ============================================ */
 /* ··········································· § UTILS ··· */
