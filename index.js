@@ -13,6 +13,7 @@ console.log(wordTracker)
 let headerContainer = null
 let wordleContainer = null
 let wordleSection = null
+let messageModalContainer = null
 
 /* ============================================ */
 /* ··········································· § HEADER ··· */
@@ -205,10 +206,56 @@ async function boxFeedback(wordStatus) {
   }
 }
 
+function createMessageModalContainer() {
+  const modal = document.createElement('div')
+  // modal.textContent = 'Modal text content'
+  // modal.style.backgroundColor = 'lightblue'
+  modal.style.position = 'absolute'
+  modal.style.top = '70px'
+  modal.style.width = '100%'
+  modal.style.display = 'flex'
+  modal.style.flexDirection = 'column'
+  modal.style.gap = '1rem'
+
+  modal.style.alignItems = 'center'
+
+  modal.id = 'messageModalContainer'
+
+  root.insertAdjacentElement('beforeend', modal)
+  messageModalContainer = document.getElementById('messageModalContainer')
+}
+
+createMessageModalContainer()
+
+function createMessgeModal(message) {
+  const modal = document.createElement('div')
+  modal.textContent = message
+
+  modal.style.backgroundColor = 'white'
+  modal.style.color = getColorFromCSSVar('--black')
+  modal.style.borderRadius = '5px'
+  modal.style.fontSize = '14px'
+  modal.style.fontWeight = 'bold'
+  modal.style.padding = '0.8rem 0.7rem'
+
+  messageModalContainer.insertAdjacentElement('beforeend', modal)
+}
+
+createMessgeModal('message1')
+createMessgeModal('message2')
+
+function addMessage(message) {
+  createMessgeModal(message)
+
+
+
+}
+
 /* ============================================ */
 /* ··········································· § TYPING ··· */
 /* ======================================== */
 window.addEventListener('keydown', (e) => {
+  // TODO: if i press a modifier nothing should happen
   console.log(e.key)
   if (GAME_STATE === 'PLAY') {
     if (isValidLetter(e.key)) {
