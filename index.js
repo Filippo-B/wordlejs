@@ -52,6 +52,10 @@ function createWordleContainer() {
   wordleSectionEl.style.display = 'flex'
   wordleSectionEl.style.justifyContent = 'center'
   wordleSectionEl.style.width = '100%'
+  wordleSectionEl.style.display = 'flex'
+  wordleSectionEl.style.flexDirection = 'column'
+  wordleSectionEl.style.alignItems = 'center'
+
   wordleSectionEl.id = 'wordleSection'
   headerContainer.insertAdjacentElement("afterend", wordleSectionEl)
   wordleSection = document.getElementById('wordleSection')
@@ -60,6 +64,7 @@ function createWordleContainer() {
   wordleContainerEl.style.display = 'grid'
   wordleContainerEl.style.gridTemplateRows = 'repeat(6, 62px)'
   wordleContainerEl.style.gap = '5px'
+
   wordleContainerEl.id = 'wordleContainer'
   wordleSectionEl.insertAdjacentElement('afterbegin', wordleContainerEl)
   wordleContainer = document.getElementById('wordleContainer')
