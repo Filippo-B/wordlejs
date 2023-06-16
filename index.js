@@ -16,6 +16,44 @@ let wordleSection = null
 let messageModalContainer = null
 
 /* ============================================ */
+/* ··········································· § ANIMATIONS ··· */
+/* ======================================== */
+
+/**
+ * Animation of a box when a new letter is added
+ */
+const pressKeyFeedbackAnimation = [
+  { transform: 'scale(1.1)' },
+  { transform: 'scale(1)' },
+]
+
+const errorFeedbackAnimation = [
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(+4px)' },
+  { transform: 'translateX(0)' },
+]
+
+const scaleToZeroAnimation = [
+  { transform: 'scaleY(100%)' },
+  { transform: 'scaleY(0)' },
+]
+
+// TODO: there has tobe a reverse() method
+const scaleBack = [
+  { transform: 'scaleY(100%)' },
+]
+
+const fadeOutAFterDelay = [
+  { opacity: 1 },
+  { opacity: 0 }
+]
+
+
+/* ============================================ */
 /* ··········································· § HEADER ··· */
 /* ======================================== */
 
@@ -141,7 +179,8 @@ function removeLetter(e) {
 const checkWordResult = {
   correct: 'correc',
   present: 'present',
-  notPresent: 'notPresent'
+  notPresent: 'notPresent',
+  tooShort: 'tooShort'
 }
 
 /**
@@ -155,6 +194,7 @@ function checkWord(word) {
 
   if (word === WORD) return checkWordResult.correct
   if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.present
+  if (word.length < 5) return checkWordResult.tooShort
   else return checkWordResult.notPresent
 }
 
@@ -177,10 +217,19 @@ function colorFeedback(letter, i) {
 async function boxFeedback(wordStatus) {
   const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
   const boxes = currentRowEl.querySelectorAll('div')
+  const messagesCount = Array.from(messageModalContainer.querySelectorAll('.message')).length
 
   if (wordStatus === checkWordResult.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
-  } else {
+    addMessage('Not in word list')
+  } else if (wordStatus === checkWordResult.tooShort) {
+    currentRowEl.animate(errorFeedbackAnimation, 300)
+    if (messagesCount <= 10) {
+      addMessage('Not enough words')
+    }
+  }
+
+  else {
     function animate(i) {
       const box = boxes[i]
 
@@ -234,9 +283,13 @@ createMessageModalContainer()
  * Add a new message to the modal container.
  * @param {string} message - The content of the message.
  */
+let timeout = null
 function addMessage(message) {
+  if (timeout) clearTimeout(timeout)
+
   const modal = document.createElement('div')
   modal.textContent = message
+  modal.classList.add('message')
 
   modal.style.backgroundColor = 'white'
   modal.style.color = getColorFromCSSVar('--black')
@@ -245,11 +298,44 @@ function addMessage(message) {
   modal.style.fontWeight = 'bold'
   modal.style.padding = '0.8rem 0.7rem'
 
-  messageModalContainer.insertAdjacentElement('beforeend', modal)
+  messageModalContainer.insertAdjacentElement('afterBegin', modal)
+
+  const messages = Array.from(messageModalContainer.querySelectorAll('.message'))
+
+  if (messages.length > 8) messages[messages.length - 1].remove()
+
+  timeout = setTimeout(() => removeModalsMessages(), 1000)
 }
 
-addMessage('message1')
-addMessage('message2')
+
+function removeModalsMessages() {
+  const messagesEl = Array.from(messageModalContainer.querySelectorAll('.message'))
+  let i = messagesEl.length - 1
+
+  /**
+   * Check if there is an element after the current one. If there is it means that another message has been added while the function was in execution, and it needs to stop on order to avoid messing up the animation.
+   */
+  function elementAfterCurrent() {
+    return Array.from(messageModalContainer.querySelectorAll('.message'))[i + 1]
+  }
+
+  function animate(i) {
+    const message = messagesEl[i]
+
+    if (i < 0) return
+    if (elementAfterCurrent()) return
+
+    const an = message.animate(fadeOutAFterDelay, { duration: 100, fill: 'forwards' })
+    an.play()
+
+    an.onfinish = () => {
+      message.remove()
+      animate(i - 1)
+    }
+  }
+  animate(i)
+}
+
 
 /* ============================================ */
 /* ··········································· § TYPING ··· */
@@ -281,33 +367,6 @@ function isValidLetter(letter) {
   return /^[a-z]{1}$/i.test(letter) && letter.length === 1
 }
 
-/**
- * Animation of a box when a new letter is added
- */
-const pressKeyFeedbackAnimation = [
-  { transform: 'scale(1.1)' },
-  { transform: 'scale(1)' },
-]
-
-const errorFeedbackAnimation = [
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(+4px)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(+4px)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(+4px)' },
-  { transform: 'translateX(0)' },
-]
-
-const scaleToZeroAnimation = [
-  { transform: 'scaleY(100%)' },
-  { transform: 'scaleY(0)' },
-]
-
-const scaleBack = [
-  { transform: 'scaleY(100%)' },
-
-]
 
 /**
  * Get the color from a CSS variable.
