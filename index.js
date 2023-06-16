@@ -176,7 +176,7 @@ function removeLetter(e) {
   }
 }
 
-const checkWordResult = {
+const wordIs = {
   correct: 'correc',
   present: 'present',
   notPresent: 'notPresent',
@@ -192,10 +192,10 @@ function checkWord(word) {
   word = word.trim()
   if (typeof (word) !== 'string') throw Error('word must be a string.')
 
-  if (word === WORD) return checkWordResult.correct
-  if (wordleLa.has(word) || wordleTa.has(word)) return checkWordResult.present
-  if (word.length < 5) return checkWordResult.tooShort
-  else return checkWordResult.notPresent
+  if (word === WORD) return wordIs.correct
+  if (wordleLa.has(word) || wordleTa.has(word)) return wordIs.present
+  if (word.length < 5) return wordIs.tooShort
+  else return wordIs.notPresent
 }
 
 /**
@@ -219,18 +219,21 @@ async function boxFeedback(wordStatus) {
   const boxes = currentRowEl.querySelectorAll('div')
   const messagesCount = Array.from(messageModalContainer.querySelectorAll('.message')).length
 
-  if (wordStatus === checkWordResult.notPresent) {
+  if (wordStatus === wordIs.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
     addMessage('Not in word list')
-  } else if (wordStatus === checkWordResult.tooShort) {
+  } else if (wordStatus === wordIs.tooShort) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
     if (messagesCount <= 10) {
       addMessage('Not enough words')
     }
-  }
+  } else {
 
-  else {
-    function animate(i) {
+    /**
+     * Animate the letters in sequence, giving each box the appropriate background color.
+     * @param {number} i - The starting index. 0 is the default.
+     */
+    function animateLetters(i = 0) {
       const box = boxes[i]
 
       if (!box) return
@@ -243,14 +246,15 @@ async function boxFeedback(wordStatus) {
         box.style.backgroundColor = colorFeedback(currentLetter, i)
         box.style.borderColor = colorFeedback(currentLetter, i)
         box.animate(scaleBack, { duration: 300, fill: 'forwards' })
-        animate(i + 1)
+        animateLetters(i + 1)
       }
     }
 
-    animate(0)
+    animateLetters()
     CURRENT_ROW++
   }
-  if (wordStatus === checkWordResult.correct) {
+
+  if (wordStatus === wordIs.correct) {
     GAME_STATE = 'END'
   }
 }
@@ -319,7 +323,11 @@ function removeModalsMessages() {
     return Array.from(messageModalContainer.querySelectorAll('.message'))[i + 1]
   }
 
-  function animate(i) {
+  /**
+   * Removes the message in sequence starting from the last one.
+   * @param {number} i - The index of the last element.
+   */
+  function removeMessagesInSequence(i) {
     const message = messagesEl[i]
 
     if (i < 0) return
@@ -330,10 +338,10 @@ function removeModalsMessages() {
 
     an.onfinish = () => {
       message.remove()
-      animate(i - 1)
+      removeMessagesInSequence(i - 1)
     }
   }
-  animate(i)
+  removeMessagesInSequence(i)
 }
 
 
@@ -366,7 +374,6 @@ window.addEventListener('keydown', (e) => {
 function isValidLetter(letter) {
   return /^[a-z]{1}$/i.test(letter) && letter.length === 1
 }
-
 
 /**
  * Get the color from a CSS variable.
