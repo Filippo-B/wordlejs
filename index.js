@@ -206,6 +206,9 @@ async function boxFeedback(wordStatus) {
   }
 }
 
+/**
+ * Creates the container for the messages.
+ */
 function createMessageModalContainer() {
   const modal = document.createElement('div')
   // modal.textContent = 'Modal text content'
@@ -227,7 +230,11 @@ function createMessageModalContainer() {
 
 createMessageModalContainer()
 
-function createMessgeModal(message) {
+/**
+ * Add a new message to the modal container.
+ * @param {string} message - The content of the message.
+ */
+function addMessage(message) {
   const modal = document.createElement('div')
   modal.textContent = message
 
@@ -241,15 +248,8 @@ function createMessgeModal(message) {
   messageModalContainer.insertAdjacentElement('beforeend', modal)
 }
 
-createMessgeModal('message1')
-createMessgeModal('message2')
-
-function addMessage(message) {
-  createMessgeModal(message)
-
-
-
-}
+addMessage('message1')
+addMessage('message2')
 
 /* ============================================ */
 /* ··········································· § TYPING ··· */
