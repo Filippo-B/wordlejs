@@ -52,6 +52,12 @@ const fadeOutAFterDelay = [
   { opacity: 0 }
 ]
 
+const successAnimation = [
+  { transform: 'translateY(0)' },
+  { transform: 'translateY(-30px)' },
+  { transform: 'translateY(0)' }
+]
+
 
 /* ============================================ */
 /* ··········································· § HEADER ··· */
@@ -233,31 +239,49 @@ async function boxFeedback(wordStatus) {
      * Animate the letters in sequence, giving each box the appropriate background color.
      * @param {number} i - The starting index. 0 is the default.
      */
-    function animateLetters(i = 0) {
-      const box = boxes[i]
+    async function animateLetters(i = 0) {
+      if (i > 4) return;
 
-      if (!box) return
+      const box = boxes[i];
+      const currentLetter = box.textContent?.toLowerCase();
+      const an = box.animate(scaleToZeroAnimation, { duration: 150, fill: 'forwards' });
+      an.play();
 
-      const currentLetter = box.textContent?.toLowerCase()
-      const an = box.animate(scaleToZeroAnimation, { duration: 300, fill: 'forwards' })
-      an.play()
+      await new Promise(resolve => {
+        an.onfinish = (() => {
+          box.style.backgroundColor = colorFeedback(currentLetter, i);
+          box.style.borderColor = colorFeedback(currentLetter, i);
+          const revAn = box.animate(scaleBack, { duration: 150, fill: 'forwards' })
+          revAn.onfinish = () => resolve()
+        })
+      });
 
-      an.onfinish = () => {
-        box.style.backgroundColor = colorFeedback(currentLetter, i)
-        box.style.borderColor = colorFeedback(currentLetter, i)
-        box.animate(scaleBack, { duration: 300, fill: 'forwards' })
-        animateLetters(i + 1)
-      }
+      await animateLetters(i + 1);
     }
 
-    animateLetters()
+    await animateLetters()
+    if (wordStatus === wordIs.correct) {
+      console.log('animatesuccess');
+      function animateSuccess(i = 0) {
+        if (i > 4) return;
+        const box = boxes[i];
+        const an = box.animate(successAnimation, {
+          duration: 600, easing: 'cubic-bezier(0.6, -0.28, 0.74, 1.35)'
+        });
+        an.play();
+        setTimeout(() => animateSuccess(i + 1), 100);
+      }
+      setTimeout(animateSuccess, 500)
+      GAME_STATE = 'END';
+    }
     CURRENT_ROW++
   }
 
-  if (wordStatus === wordIs.correct) {
-    GAME_STATE = 'END'
-  }
+
 }
+
+
+
 
 /**
  * Creates the container for the messages.
