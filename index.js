@@ -262,26 +262,29 @@ async function boxFeedback(wordStatus) {
     await animateLetters()
     if (wordStatus === wordIs.correct) {
       console.log('animatesuccess');
+
+      /**
+       * Add the "jumpy" animation.
+       * @param {number} i - The starting index. Default is 0.
+       */
       function animateSuccess(i = 0) {
         if (i > 4) return;
+
         const box = boxes[i];
         const an = box.animate(successAnimation, {
           duration: 600, easing: 'cubic-bezier(0.6, -0.28, 0.74, 1.35)'
         });
+
         an.play();
         setTimeout(() => animateSuccess(i + 1), 100);
       }
+
       setTimeout(animateSuccess, 500)
       GAME_STATE = 'END';
     }
     CURRENT_ROW++
   }
-
-
 }
-
-
-
 
 /**
  * Creates the container for the messages.
