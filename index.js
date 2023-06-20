@@ -15,6 +15,17 @@ let wordleContainer = null
 let wordleSection = null
 let messageModalContainer = null
 
+const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+<path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
+</svg>`
+/* ============================================ */
+/* ··········································· § ROOT STYLES ··· */
+/* ======================================== */
+
+root.style.display = 'flex'
+root.style.flexDirection = 'column'
+root.style.minHeight = '100vh'
+
 /* ============================================ */
 /* ··········································· § ANIMATIONS ··· */
 /* ======================================== */
@@ -99,6 +110,7 @@ function createWordleContainer() {
   wordleSectionEl.style.display = 'flex'
   wordleSectionEl.style.flexDirection = 'column'
   wordleSectionEl.style.alignItems = 'center'
+  wordleSectionEl.style.flexGrow = 1
 
   wordleSectionEl.id = 'wordleSection'
   headerContainer.insertAdjacentElement("afterend", wordleSectionEl)
@@ -108,6 +120,7 @@ function createWordleContainer() {
   wordleContainerEl.style.display = 'grid'
   wordleContainerEl.style.gridTemplateRows = 'repeat(6, 62px)'
   wordleContainerEl.style.gap = '5px'
+  wordleContainerEl.style.marginBottom = 'auto'
 
   wordleContainerEl.id = 'wordleContainer'
   wordleSectionEl.insertAdjacentElement('afterbegin', wordleContainerEl)
@@ -148,6 +161,68 @@ function generateGrid() {
   wordleSection.insertAdjacentElement('afterbegin', wordleContainer)
 }
 generateGrid()
+
+/* ============================================ */
+/* ··········································· § Keyboard ··· */
+/* ======================================== */
+function generateKeyboard() {
+  const keyboardContainer = document.createElement('section')
+  keyboardContainer.id = 'keyboardContainer'
+  keyboardContainer.style.display = 'grid'
+  keyboardContainer.style.gridTemplateColumns = 'repeat(20, 1fr)'
+  keyboardContainer.style.gridTemplateRows = 'repeat(3, 1fr)'
+  keyboardContainer.style.gap = '0.4rem'
+  keyboardContainer.style.paddingBottom = '0.5rem'
+
+  keyboardContainer.style.width = '100%'
+  keyboardContainer.style.maxWidth = '484px'
+  keyboardContainer.style.height = '200px'
+
+  const keys = [
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+    [' ', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ' '],
+    ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'back']
+  ].flat()
+
+  for (let letter of keys) {
+    const key = document.createElement('div')
+    if (letter === ' ') {
+      key.style.display = 'flex'
+      key.style.justifyContent = 'center'
+      key.style.alignItems = 'center'
+      key.style.gridArea = 'space'
+      key.style.gridColumn = 'span 1'
+      key.style.gridRow = 'span 1'
+
+    } else {
+      const bigKey = ['enter', 'back']
+
+      if (letter === 'back') {
+        key.insertAdjacentHTML('afterbegin', backSpaceSVG)
+      } else {
+        key.textContent = letter.toUpperCase()
+      }
+
+      key.setAttribute('data-key', letter)
+      key.style.backgroundColor = getColorFromCSSVar('--key-bg')
+      key.style.display = 'flex'
+      key.style.justifyContent = 'center'
+      key.style.alignItems = 'center'
+      key.style.gridArea = 'key'
+      key.style.gridColumn = bigKey.includes(letter) ? 'span 3' : 'span 2'
+      key.style.gridRow = 'span 1'
+      key.style.fontSize = letter === 'enter' ? '0.7rem' : '1.2rem'
+      key.style.borderRadius = '0.3rem'
+      key.style.cursor = 'pointer'
+    }
+
+    keyboardContainer.insertAdjacentElement('beforeend', key)
+  }
+
+  wordleSection.insertAdjacentElement('beforeend', keyboardContainer)
+}
+
+generateKeyboard()
 
 
 /**
