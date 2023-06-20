@@ -282,6 +282,13 @@ async function boxFeedback(wordStatus) {
       setTimeout(animateSuccess, 500)
       GAME_STATE = 'END';
     }
+
+    const isLastRow = CURRENT_ROW === ROWS - 1
+
+    if (wordStatus === wordIs.present && isLastRow) {
+      addMessage(capitalize(WORD), true)
+      GAME_STATE = 'END'
+    }
     CURRENT_ROW++
   }
 }
@@ -315,7 +322,7 @@ createMessageModalContainer()
  * @param {string} message - The content of the message.
  */
 let timeout = null
-function addMessage(message) {
+function addMessage(message, fixed = false) {
   if (timeout) clearTimeout(timeout)
 
   const modal = document.createElement('div')
@@ -335,7 +342,7 @@ function addMessage(message) {
 
   if (messages.length > 8) messages[messages.length - 1].remove()
 
-  timeout = setTimeout(() => removeModalsMessages(), 1000)
+  if (!fixed) timeout = setTimeout(() => removeModalsMessages(), 1000)
 }
 
 
@@ -409,4 +416,10 @@ function isValidLetter(letter) {
  */
 function getColorFromCSSVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name)
+}
+
+function capitalize(string) {
+  const arr = string.split(' ')
+  const firstCapital = arr.map(str => str[0].toUpperCase() + str.slice(1))
+  return firstCapital.join(' ')
 }
