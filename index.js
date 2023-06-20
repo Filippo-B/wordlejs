@@ -42,12 +42,12 @@ const scaleToZeroAnimation = [
   { transform: 'scaleY(0)' },
 ]
 
-// TODO: there has tobe a reverse() method
-const scaleBack = [
+// TODO: there has to be a reverse() method
+const scaleTo100 = [
   { transform: 'scaleY(100%)' },
 ]
 
-const fadeOutAFterDelay = [
+const fadeOut = [
   { opacity: 1 },
   { opacity: 0 }
 ]
@@ -57,7 +57,6 @@ const successAnimation = [
   { transform: 'translateY(-30px)' },
   { transform: 'translateY(0)' }
 ]
-
 
 /* ============================================ */
 /* ··········································· § HEADER ··· */
@@ -183,7 +182,7 @@ function removeLetter(e) {
 }
 
 const wordIs = {
-  correct: 'correc',
+  correct: 'correct',
   present: 'present',
   notPresent: 'notPresent',
   tooShort: 'tooShort'
@@ -210,7 +209,7 @@ function checkWord(word) {
  * @param {number} i - The index.
  * @returns {string} - The color.
  */
-function colorFeedback(letter, i) {
+function boxBackgroundColor(letter, i) {
   if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
   if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
   return getColorFromCSSVar('--color-absent')
@@ -230,8 +229,10 @@ async function boxFeedback(wordStatus) {
     addMessage('Not in word list')
   } else if (wordStatus === wordIs.tooShort) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
+
+    // Prevents adding too many notifications.
     if (messagesCount <= 10) {
-      addMessage('Not enough words')
+      addMessage('Not enough letters')
     }
   } else {
 
@@ -249,9 +250,9 @@ async function boxFeedback(wordStatus) {
 
       await new Promise(resolve => {
         an.onfinish = (() => {
-          box.style.backgroundColor = colorFeedback(currentLetter, i);
-          box.style.borderColor = colorFeedback(currentLetter, i);
-          const revAn = box.animate(scaleBack, { duration: 150, fill: 'forwards' })
+          box.style.backgroundColor = boxBackgroundColor(currentLetter, i);
+          box.style.borderColor = boxBackgroundColor(currentLetter, i);
+          const revAn = box.animate(scaleTo100, { duration: 150, fill: 'forwards' })
           revAn.onfinish = () => resolve()
         })
       });
@@ -260,8 +261,8 @@ async function boxFeedback(wordStatus) {
     }
 
     await animateLetters()
+
     if (wordStatus === wordIs.correct) {
-      console.log('animatesuccess');
 
       /**
        * Add the "jumpy" animation.
@@ -270,8 +271,7 @@ async function boxFeedback(wordStatus) {
       function animateSuccess(i = 0) {
         if (i > 4) return;
 
-        const box = boxes[i];
-        const an = box.animate(successAnimation, {
+        const an = boxes[i].animate(successAnimation, {
           duration: 600, easing: 'cubic-bezier(0.6, -0.28, 0.74, 1.35)'
         });
 
@@ -298,8 +298,6 @@ async function boxFeedback(wordStatus) {
  */
 function createMessageModalContainer() {
   const modal = document.createElement('div')
-  // modal.textContent = 'Modal text content'
-  // modal.style.backgroundColor = 'lightblue'
   modal.style.position = 'absolute'
   modal.style.top = '70px'
   modal.style.width = '100%'
@@ -367,7 +365,7 @@ function removeModalsMessages() {
     if (i < 0) return
     if (elementAfterCurrent()) return
 
-    const an = message.animate(fadeOutAFterDelay, { duration: 100, fill: 'forwards' })
+    const an = message.animate(fadeOut, { duration: 100, fill: 'forwards' })
     an.play()
 
     an.onfinish = () => {
@@ -418,6 +416,10 @@ function getColorFromCSSVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name)
 }
 
+/**
+ * Make the first letter of every word a capital letter. "First letter" means a letter after a space.
+ * @param {string} string - A string of one or more letters
+ */
 function capitalize(string) {
   const arr = string.split(' ')
   const firstCapital = arr.map(str => str[0].toUpperCase() + str.slice(1))
