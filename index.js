@@ -14,7 +14,14 @@ let headerContainer = null
 let wordleContainer = null
 let wordleSection = null
 let messageModalContainer = null
+let keyboardContainer = null
 
+const wordIs = {
+  correct: 'correct',
+  present: 'present',
+  notPresent: 'notPresent',
+  tooShort: 'tooShort'
+}
 const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
 </svg>`
@@ -165,8 +172,26 @@ generateGrid()
 /* ============================================ */
 /* ··········································· § Keyboard ··· */
 /* ======================================== */
-function generateKeyboard() {
-  const keyboardContainer = document.createElement('section')
+const keys = {
+  'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
+  ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
+  'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
+}
+
+function keyboardKeyBackground(bg) {
+  if (bg === wordIs.present) return getColorFromCSSVar('--color-present')
+  if (bg === wordIs.notPresent) return getColorFromCSSVar('--color-absent')
+  if (bg === wordIs.correct) return getColorFromCSSVar('--color-correct')
+  return getColorFromCSSVar('--key-bg')
+}
+
+function generateKeyboard(keys) {
+  const keysArr = Object.keys(keys)
+  if (keyboardContainer) {
+    keyboardContainer.innerHTML = ''
+  } else {
+    keyboardContainer = document.createElement('section')
+  }
   keyboardContainer.id = 'keyboardContainer'
   keyboardContainer.style.display = 'grid'
   keyboardContainer.style.gridTemplateColumns = 'repeat(20, 1fr)'
@@ -178,13 +203,7 @@ function generateKeyboard() {
   keyboardContainer.style.maxWidth = '484px'
   keyboardContainer.style.height = '200px'
 
-  const keys = [
-    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-    [' ', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ' '],
-    ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'back']
-  ].flat()
-
-  for (let letter of keys) {
+  for (let letter of keysArr) {
     const key = document.createElement('div')
     if (letter === ' ') {
       key.style.display = 'flex'
@@ -204,7 +223,7 @@ function generateKeyboard() {
       }
 
       key.setAttribute('data-key', letter)
-      key.style.backgroundColor = getColorFromCSSVar('--key-bg')
+      key.style.backgroundColor = keyboardKeyBackground(keys[letter])
       key.style.display = 'flex'
       key.style.justifyContent = 'center'
       key.style.alignItems = 'center'
@@ -222,7 +241,7 @@ function generateKeyboard() {
   wordleSection.insertAdjacentElement('beforeend', keyboardContainer)
 }
 
-generateKeyboard()
+generateKeyboard(keys)
 
 
 /**
@@ -256,12 +275,7 @@ function removeLetter(e) {
   }
 }
 
-const wordIs = {
-  correct: 'correct',
-  present: 'present',
-  notPresent: 'notPresent',
-  tooShort: 'tooShort'
-}
+
 
 /**
  * Check if the word is correct or not.
@@ -288,6 +302,12 @@ function boxBackgroundColor(letter, i) {
   if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
   if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
   return getColorFromCSSVar('--color-absent')
+}
+
+function updateKeyboardObject(letter, i) {
+  if (WORD[i] === letter) return wordIs.correct
+  if (WORD.includes(letter)) return wordIs.present
+  return wordIs.notPresent
 }
 
 /**
@@ -337,6 +357,7 @@ async function boxFeedback(wordStatus) {
 
     await animateLetters()
 
+
     if (wordStatus === wordIs.correct) {
 
       /**
@@ -358,6 +379,12 @@ async function boxFeedback(wordStatus) {
       GAME_STATE = 'END';
     }
 
+    boxes.forEach((box, i) => {
+      const letter = box.textContent.toLowerCase()
+      keys[letter] = updateKeyboardObject(letter, i)
+    })
+    generateKeyboard(keys)
+
     const isLastRow = CURRENT_ROW === ROWS - 1
 
     if (wordStatus === wordIs.present && isLastRow) {
@@ -366,6 +393,10 @@ async function boxFeedback(wordStatus) {
     }
     CURRENT_ROW++
   }
+}
+
+function keyboardFeedback() {
+
 }
 
 /**
