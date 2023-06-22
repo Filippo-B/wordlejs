@@ -99,17 +99,58 @@ function createHeader() {
   header.style.borderBottom = `1px solid ${getColorFromCSSVar('--color-tone-3')}`
   header.style.textAlign = `center`
   header.style.marginBottom = '6rem'
+  header.style.display = 'flex'
+  header.style.gap = '0.5rem'
+  header.style.flexDirection = 'column'
   header.id = 'headerContainer'
   root.insertAdjacentElement('afterbegin', header)
   headerContainer = document.getElementById('headerContainer')
 
   /* =================================== § HEADER TITLE === */
   const title = document.createElement('h1')
-  title.textContent = 'Wordle'
+  title.textContent = 'WordleJS'
   title.style.fontFamily = '"Roboto Slab", serif'
   title.style.fontSize = '38px'
   title.style.fontWeight = '700'
+
+  const subtitle = document.createElement('p')
+  subtitle.innerHTML = 'A Wordle clone in vanilla JS by <a href="https://github.com/Filippo-b">Filippo Bistot</a>'
+  header.insertAdjacentElement('afterbegin', subtitle)
   header.insertAdjacentElement('afterbegin', title)
+
+  /* =================================== § MENU === */
+  const menu = document.createElement('nav')
+  menu.style.display = 'flex'
+  menu.style.flexDirection = 'row'
+  menu.style.gap = '0.9rem'
+  menu.style.justifyContent = 'center'
+
+  const cheat = document.createElement('p')
+  cheat.textContent = 'Cheat'
+
+  cheat.style.textDecoration = 'underline'
+  cheat.style.cursor = 'pointer'
+
+  cheat.addEventListener('click', () => {
+    if (cheat.textContent !== WORD) {
+
+      cheat.textContent = capitalize(WORD) + ' 😜'
+      cheat.style.textDecoration = 'unset'
+    }
+
+  })
+
+  const about = document.createElement('a')
+  about.textContent = 'More about this project'
+  about.href = '/'
+
+  about.style.textDecoration = 'underline'
+  about.style.cursor = 'pointer'
+
+
+  menu.insertAdjacentElement('beforeend', cheat)
+  menu.insertAdjacentElement('beforeend', about)
+  header.insertAdjacentElement('beforeend', menu)
 
 }
 createHeader()
@@ -209,6 +250,7 @@ function keyboardKeyBackground(letterStatus) {
  * @param {object} keys - The object containing all the keys and their status.
  */
 function generateKeyboard(keys) {
+  // TODO: Add event listener to keys
   const keysArr = Object.keys(keys)
   if (keyboardContainer) {
     keyboardContainer.innerHTML = ''
@@ -278,7 +320,7 @@ function addLetter(e) {
   const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
   if (firstEmptySpace !== -1) {
     wordTracker[CURRENT_ROW][firstEmptySpace] = e.key
-    console.log(`[data-box="${CURRENT_ROW},${firstEmptySpace}]`)
+    // console.log(`[data-box="${CURRENT_ROW},${firstEmptySpace}]`)
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
     boxElement.textContent = e.key.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
@@ -538,7 +580,7 @@ function modifierState(e) {
 }
 
 window.addEventListener('keydown', (e) => {
-  console.log(e.key)
+  // console.log(e.key)
   if (GAME_STATE === 'PLAY' && modifierState(e)) {
     if (isValidLetter(e.key)) {
       addLetter(e)
