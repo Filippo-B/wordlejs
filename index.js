@@ -172,19 +172,31 @@ generateGrid()
 /* ============================================ */
 /* ··········································· § Keyboard ··· */
 /* ======================================== */
+/**
+ * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
+ */
 const keys = {
   'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
   ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
   'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
 }
 
-function keyboardKeyBackground(bg) {
-  if (bg === wordIs.present) return getColorFromCSSVar('--color-present')
-  if (bg === wordIs.notPresent) return getColorFromCSSVar('--color-absent')
-  if (bg === wordIs.correct) return getColorFromCSSVar('--color-correct')
+/**
+ * Returns the appropriate css color based on the current letter status
+ * @param {String} letterStatus - Whether the word, is present, not present or correct.
+ * @return - A css color.
+ */
+function keyboardKeyBackground(letterStatus) {
+  if (letterStatus === wordIs.present) return getColorFromCSSVar('--color-present')
+  if (letterStatus === wordIs.notPresent) return getColorFromCSSVar('--color-absent')
+  if (letterStatus === wordIs.correct) return getColorFromCSSVar('--color-correct')
   return getColorFromCSSVar('--key-bg')
 }
 
+/**
+ * Generates the keyboard using the right colors.
+ * @param {object} keys - The object containing all the keys and their status.
+ */
 function generateKeyboard(keys) {
   const keysArr = Object.keys(keys)
   if (keyboardContainer) {
@@ -242,7 +254,6 @@ function generateKeyboard(keys) {
 }
 
 generateKeyboard(keys)
-
 
 /**
  * Adds a letter to the first empty box of the active row.
