@@ -397,17 +397,24 @@ async function boxFeedback(wordStatus) {
 
     boxes.forEach((box, i) => {
       const letter = box.textContent.toLowerCase()
-      keys[letter] = keys[letter] !== wordIs.correct ? updateKeyboardObject(letter, i) : wordIs.correct
+
+      if (keys[letter] !== wordIs.correct) {
+        keys[letter] = updateLetterInKeyboardObject(letter, i)
+      }
     })
     generateKeyboard(keys)
 
     const isLastRow = CURRENT_ROW === ROWS - 1
 
-    if (wordStatus === wordIs.present && isLastRow) {
-      addMessage(capitalize(WORD), true)
+    if (isLastRow) {
+      if (wordStatus === wordIs.present) {
+        addMessage(capitalize(WORD), true)
+      }
+
       GAME_STATE = 'END'
+    } else {
+      CURRENT_ROW++
     }
-    CURRENT_ROW++
   }
 }
 
