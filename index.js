@@ -392,7 +392,7 @@ async function boxFeedback(wordStatus) {
 
     boxes.forEach((box, i) => {
       const letter = box.textContent.toLowerCase()
-      keys[letter] = updateKeyboardObject(letter, i)
+      keys[letter] = keys[letter] !== wordIs.correct ? updateKeyboardObject(letter, i) : wordIs.correct
     })
     generateKeyboard(keys)
 
