@@ -332,6 +332,7 @@ function updateLetterInKeyboardObject(letter, i) {
  * @param {string} wordStatus - Whether the word is correct, present or not present
  */
 async function boxFeedback(wordStatus) {
+  GAME_STATE = 'WAIT'
   const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
   const boxes = currentRowEl.querySelectorAll('div')
   const messagesCount = Array.from(notificationContainer.querySelectorAll('.message')).length
@@ -339,8 +340,10 @@ async function boxFeedback(wordStatus) {
   if (wordStatus === wordIs.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
     addAndRemoveNotification('Not in word list')
+    GAME_STATE = 'PLAY'
   } else if (wordStatus === wordIs.tooShort) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
+    GAME_STATE = 'PLAY'
 
     // Prevents adding too many notifications.
     if (messagesCount <= 10) {
@@ -414,6 +417,7 @@ async function boxFeedback(wordStatus) {
       GAME_STATE = 'END'
     } else {
       CURRENT_ROW++
+      GAME_STATE = 'PLAY'
     }
   }
 }
