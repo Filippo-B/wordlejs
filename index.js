@@ -13,7 +13,7 @@ console.log(wordTracker)
 let headerContainer = null
 let wordleContainer = null
 let wordleSection = null
-let messageModalContainer = null
+let notificationContainer = null
 let keyboardContainer = null
 
 const wordIs = {
@@ -334,17 +334,17 @@ function updateLetterInKeyboardObject(letter, i) {
 async function boxFeedback(wordStatus) {
   const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
   const boxes = currentRowEl.querySelectorAll('div')
-  const messagesCount = Array.from(messageModalContainer.querySelectorAll('.message')).length
+  const messagesCount = Array.from(notificationContainer.querySelectorAll('.message')).length
 
   if (wordStatus === wordIs.notPresent) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
-    addMessage('Not in word list')
+    addAndRemoveNotification('Not in word list')
   } else if (wordStatus === wordIs.tooShort) {
     currentRowEl.animate(errorFeedbackAnimation, 300)
 
     // Prevents adding too many notifications.
     if (messagesCount <= 10) {
-      addMessage('Not enough letters')
+      addAndRemoveNotification('Not enough letters')
     }
   } else {
 
@@ -408,7 +408,7 @@ async function boxFeedback(wordStatus) {
 
     if (isLastRow) {
       if (wordStatus === wordIs.present) {
-        addMessage(capitalize(WORD), true)
+        addAndRemoveNotification(capitalize(WORD), true)
       }
 
       GAME_STATE = 'END'
@@ -418,14 +418,13 @@ async function boxFeedback(wordStatus) {
   }
 }
 
-function keyboardFeedback() {
-
-}
-
+/* ============================================ */
+/* ··········································· § NOTIFICATION ··· */
+/* ======================================== */
 /**
- * Creates the container for the messages.
+ * Creates the container for the notifications.
  */
-function createMessageModalContainer() {
+function createNotificationContainer() {
   const modal = document.createElement('div')
   modal.style.position = 'absolute'
   modal.style.top = '70px'
@@ -436,52 +435,56 @@ function createMessageModalContainer() {
 
   modal.style.alignItems = 'center'
 
-  modal.id = 'messageModalContainer'
+  modal.id = 'notificationContainer'
 
   root.insertAdjacentElement('beforeend', modal)
-  messageModalContainer = document.getElementById('messageModalContainer')
+  notificationContainer = document.getElementById('notificationContainer')
 }
 
-createMessageModalContainer()
+createNotificationContainer()
 
 /**
  * Add a new message to the modal container.
  * @param {string} message - The content of the message.
+ * @param {boolean} fixed - Whether the message should persist or not.
  */
 let timeout = null
-function addMessage(message, fixed = false) {
+function addAndRemoveNotification(message, persistent = false) {
   if (timeout) clearTimeout(timeout)
 
-  const modal = document.createElement('div')
-  modal.textContent = message
-  modal.classList.add('message')
+  const notification = document.createElement('div')
+  notification.textContent = message
+  notification.classList.add('notification')
 
-  modal.style.backgroundColor = 'white'
-  modal.style.color = getColorFromCSSVar('--black')
-  modal.style.borderRadius = '5px'
-  modal.style.fontSize = '14px'
-  modal.style.fontWeight = 'bold'
-  modal.style.padding = '0.8rem 0.7rem'
+  notification.style.backgroundColor = 'white'
+  notification.style.color = getColorFromCSSVar('--black')
+  notification.style.borderRadius = '5px'
+  notification.style.fontSize = '14px'
+  notification.style.fontWeight = 'bold'
+  notification.style.padding = '0.8rem 0.7rem'
 
-  messageModalContainer.insertAdjacentElement('afterBegin', modal)
+  notificationContainer.insertAdjacentElement('afterBegin', notification)
 
-  const messages = Array.from(messageModalContainer.querySelectorAll('.message'))
+  const messages = Array.from(notificationContainer.querySelectorAll('.notification'))
 
+  // Makes sure that won't be added too many messages.
   if (messages.length > 8) messages[messages.length - 1].remove()
 
-  if (!fixed) timeout = setTimeout(() => removeModalsMessages(), 1000)
+  if (!persistent) timeout = setTimeout(() => removeNotifications(), 1000)
 }
 
-
-function removeModalsMessages() {
-  const messagesEl = Array.from(messageModalContainer.querySelectorAll('.message'))
+/**
+ * Removes the notifications one by one, starting from the last one.
+ */
+function removeNotifications() {
+  const messagesEl = Array.from(notificationContainer.querySelectorAll('.notification'))
   let i = messagesEl.length - 1
 
   /**
    * Check if there is an element after the current one. If there is it means that another message has been added while the function was in execution, and it needs to stop on order to avoid messing up the animation.
    */
   function elementAfterCurrent() {
-    return Array.from(messageModalContainer.querySelectorAll('.message'))[i + 1]
+    return Array.from(notificationContainer.querySelectorAll('.notification'))[i + 1]
   }
 
   /**
