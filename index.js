@@ -105,7 +105,9 @@ function createHeader() {
 }
 createHeader()
 
-/* =================================== § WORDLE CONTAINER === */
+/* ============================================ */
+/* ··········································· § WORDLE CONTAINER ··· */
+/* ======================================== */
 /**
  * Create the wordle section and container.
  */
@@ -255,6 +257,9 @@ function generateKeyboard(keys) {
 
 generateKeyboard(keys)
 
+/* ============================================ */
+/* ··········································· § WORDLE GRID FUNCTIONALITY ··· */
+/* ======================================== */
 /**
  * Adds a letter to the first empty box of the active row.
  */
@@ -286,8 +291,6 @@ function removeLetter(e) {
   }
 }
 
-
-
 /**
  * Check if the word is correct or not.
  * @param {string} word - The word to check.
@@ -315,7 +318,10 @@ function boxBackgroundColor(letter, i) {
   return getColorFromCSSVar('--color-absent')
 }
 
-function updateKeyboardObject(letter, i) {
+/**
+ * Updates the object with the current status for every key.
+ */
+function updateLetterInKeyboardObject(letter, i) {
   if (WORD[i] === letter) return wordIs.correct
   if (WORD.includes(letter)) return wordIs.present
   return wordIs.notPresent
@@ -367,7 +373,6 @@ async function boxFeedback(wordStatus) {
     }
 
     await animateLetters()
-
 
     if (wordStatus === wordIs.correct) {
 
