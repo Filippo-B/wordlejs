@@ -516,10 +516,21 @@ function removeNotifications() {
 /* ============================================ */
 /* ··········································· § TYPING ··· */
 /* ======================================== */
+
+/**
+ * Check wether the modifier keys are pressed.
+ * @return true of shift, cmd, ctrl or alt are pressed, false otherwise.
+ */
+function modifierState(e) {
+  return !e.altKey
+    && !e.metaKey
+    && !e.ctrlKey
+    && !e.shiftKey
+}
+
 window.addEventListener('keydown', (e) => {
-  // TODO: if i press a modifier nothing should happen
   console.log(e.key)
-  if (GAME_STATE === 'PLAY') {
+  if (GAME_STATE === 'PLAY' && modifierState(e)) {
     if (isValidLetter(e.key)) {
       addLetter(e)
     } else if (e.key === 'Backspace') {
