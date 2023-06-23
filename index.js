@@ -250,23 +250,24 @@ function keyboardKeyBackground(letterStatus) {
  * @param {object} keys - The object containing all the keys and their status.
  */
 function generateKeyboard(keys) {
-  // TODO: Add event listener to keys
   const keysArr = Object.keys(keys)
   if (keyboardContainer) {
     keyboardContainer.innerHTML = ''
   } else {
     keyboardContainer = document.createElement('section')
   }
+
   keyboardContainer.id = 'keyboardContainer'
   keyboardContainer.style.display = 'grid'
   keyboardContainer.style.gridTemplateColumns = 'repeat(20, 1fr)'
   keyboardContainer.style.gridTemplateRows = 'repeat(3, 1fr)'
   keyboardContainer.style.gap = '0.4rem'
   keyboardContainer.style.paddingBottom = '0.5rem'
-
   keyboardContainer.style.width = '100%'
   keyboardContainer.style.maxWidth = '484px'
   keyboardContainer.style.height = '200px'
+
+  console.log(keyboardContainer.style)
 
   for (let letter of keysArr) {
     const key = document.createElement('div')
@@ -282,15 +283,14 @@ function generateKeyboard(keys) {
       const bigKey = ['enter', 'back']
 
       if (letter === 'back') {
-
         key.insertAdjacentHTML('afterbegin', backSpaceSVG)
-
       } else {
         key.textContent = letter.toUpperCase()
       }
 
       key.setAttribute('data-key', letter)
       key.classList.add('keyboard-key')
+
       key.style.backgroundColor = keyboardKeyBackground(keys[letter])
       key.style.display = 'flex'
       key.style.justifyContent = 'center'
@@ -307,11 +307,16 @@ function generateKeyboard(keys) {
   }
 
   wordleSection.insertAdjacentElement('beforeend', keyboardContainer)
-
 }
 
+/**
+ * Add the click event to the keyboard keys.
+ */
 function keyboardClickEvent() {
   keyboardContainer.addEventListener('click', e => {
+    /**
+     * Check if the target has a key attribute. If not, it looks on its parent to find one.
+     */
     const key = e.target.dataset.key || e.path.find(el => el.classList.contains('keyboard-key')).dataset.key
 
     if (key) {
@@ -325,11 +330,9 @@ function keyboardClickEvent() {
       }
     }
   })
-
 }
 
 generateKeyboard(keys)
-
 keyboardClickEvent()
 /* ============================================ */
 /* ··········································· § WORDLE GRID FUNCTIONALITY ··· */
@@ -338,12 +341,10 @@ keyboardClickEvent()
  * Adds a letter to the first empty box of the active row.
  */
 function addLetter(letter) {
-  // const row = () => CURRENT_ROW
-  // console.log(row())
   const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
+
   if (firstEmptySpace !== -1) {
     wordTracker[CURRENT_ROW][firstEmptySpace] = letter
-    // console.log(`[data-box="${CURRENT_ROW},${firstEmptySpace}]`)
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
     boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
@@ -427,7 +428,7 @@ async function boxFeedback(wordStatus) {
 
     /**
      * Animate the letters in sequence, giving each box the appropriate background color.
-     * @param {number} i - The starting index. 0 is the default.
+     * @param {number} [i=0] - The starting index. Default is 0.
      */
     async function animateLetters(i = 0) {
       if (i > 4) return;
@@ -455,7 +456,7 @@ async function boxFeedback(wordStatus) {
 
       /**
        * Add the "jumpy" animation.
-       * @param {number} i - The starting index. Default is 0.
+       * @param {number} [i=0] - The starting index. Default is 0.
        */
       function animateSuccess(i = 0) {
         if (i > 4) return;
@@ -479,6 +480,7 @@ async function boxFeedback(wordStatus) {
         keys[letter] = updateLetterInKeyboardObject(letter, i)
       }
     })
+
     generateKeyboard(keys)
 
     const isLastRow = CURRENT_ROW === ROWS - 1
