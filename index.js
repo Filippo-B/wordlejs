@@ -282,12 +282,15 @@ function generateKeyboard(keys) {
       const bigKey = ['enter', 'back']
 
       if (letter === 'back') {
+
         key.insertAdjacentHTML('afterbegin', backSpaceSVG)
+
       } else {
         key.textContent = letter.toUpperCase()
       }
 
       key.setAttribute('data-key', letter)
+      key.classList.add('keyboard-key')
       key.style.backgroundColor = keyboardKeyBackground(keys[letter])
       key.style.display = 'flex'
       key.style.justifyContent = 'center'
@@ -304,25 +307,45 @@ function generateKeyboard(keys) {
   }
 
   wordleSection.insertAdjacentElement('beforeend', keyboardContainer)
+
+}
+
+function keyboardClickEvent() {
+  keyboardContainer.addEventListener('click', e => {
+    const key = e.target.dataset.key || e.path.find(el => el.classList.contains('keyboard-key')).dataset.key
+
+    if (key) {
+      if (key === 'enter') {
+        const currentWord = wordTracker[CURRENT_ROW].join('')
+        boxFeedback(checkWord(currentWord))
+      } else if (key === 'back') {
+        removeLetter()
+      } else {
+        addLetter(key)
+      }
+    }
+  })
+
 }
 
 generateKeyboard(keys)
 
+keyboardClickEvent()
 /* ============================================ */
 /* ··········································· § WORDLE GRID FUNCTIONALITY ··· */
 /* ======================================== */
 /**
  * Adds a letter to the first empty box of the active row.
  */
-function addLetter(e) {
+function addLetter(letter) {
   // const row = () => CURRENT_ROW
   // console.log(row())
   const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
   if (firstEmptySpace !== -1) {
-    wordTracker[CURRENT_ROW][firstEmptySpace] = e.key
+    wordTracker[CURRENT_ROW][firstEmptySpace] = letter
     // console.log(`[data-box="${CURRENT_ROW},${firstEmptySpace}]`)
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
-    boxElement.textContent = e.key.toUpperCase()
+    boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
     boxElement.animate(pressKeyFeedbackAnimation, 50)
   }
@@ -331,7 +354,7 @@ function addLetter(e) {
 /**
  * Removes the last letter of the active row.
  */
-function removeLetter(e) {
+function removeLetter() {
   const lastLetter = wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
 
   if (lastLetter !== -1) {
@@ -583,7 +606,7 @@ window.addEventListener('keydown', (e) => {
   // console.log(e.key)
   if (GAME_STATE === 'PLAY' && modifierState(e)) {
     if (isValidLetter(e.key)) {
-      addLetter(e)
+      addLetter(e.key)
     } else if (e.key === 'Backspace') {
       removeLetter(e)
     } else if (e.key === 'Enter') {
