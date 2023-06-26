@@ -455,7 +455,7 @@ async function boxFeedback(wordStatus) {
     if (wordStatus === wordIs.correct) {
 
       /**
-       * Add the "jumpy" animation.
+       * Add the "correct word" animation.
        * @param {number} [i=0] - The starting index. Default is 0.
        */
       function animateSuccess(i = 0) {
