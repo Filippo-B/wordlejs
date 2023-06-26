@@ -2,11 +2,38 @@
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
+
+/**
+ * The word the user has to guess. It's generated with `selectRandomWord()`,
+ */
 const WORD = selectRandomWord()
+
+/**
+ * @constant
+ * @default
+ */
 const ROWS = 6;
+
+/**
+ * @constant
+ * @default
+ */
 const COLS = 5;
+
+/**
+ * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
+ * @constant
+ */
 let CURRENT_ROW = 0
+
+/**
+ * The state of the game. Can be "PLAY" or "END"
+ */
 let GAME_STATE = 'PLAY'
+
+/**
+ * A 2d array that forms a 5x6 grid, representing the Wordle grid. This gets updated as the user plays. 
+ */
 const wordTracker = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
 // console.log(wordTracker)
 
@@ -16,24 +43,37 @@ let wordleSection = null
 let notificationContainer = null
 let keyboardContainer = null
 
-const wordIs = {
+/**
+ * All the statuses of a word or letter: 
+ * - `correct`: 
+ *   - the letter is present in the word, and at the right place
+ *   - the word is the correct one
+ * - `present`: the word is present in a list, but it's not the correct one
+ *   - the letter is in the word, but in another place
+ *   - the word is in a list, but is not the correct word
+ * - `notPresent`: the word is not in the lists of acceptable words
+ *   - the letter isn't in the word
+ *   - the word isn't in any list
+ * - `tooShort`: the word is less than 5 letters long
+ * @summary The status of a word or letter
+ */
+const tokenIs = {
   correct: 'correct',
   present: 'present',
   notPresent: 'notPresent',
   tooShort: 'tooShort'
 }
-const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-<path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
-</svg>`
 
+const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" /> </svg>`
 
 /**
- * @return  A random word.
+ * @return  A random word from the list of valid words.
  */
 function selectRandomWord() {
   let words = Array.from(wordleLa);
   return words[Math.floor(Math.random() * words.length)];
 }
+
 /* ============================================ */
 /* ··········································· § ROOT STYLES ··· */
 /* ======================================== */
@@ -47,14 +87,17 @@ root.style.minHeight = '100vh'
 /* ======================================== */
 
 /**
- * Animation of a box when a new letter is added
+ * Animation of a box when a new letter is added.
  */
-const pressKeyFeedbackAnimation = [
+const addLetterFeedbackAnimation = [
   { transform: 'scale(1.1)' },
   { transform: 'scale(1)' },
 ]
 
-const errorFeedbackAnimation = [
+/**
+ * Shaking animation. Used, for example, when the user enters a word that isn't present in any list.
+ */
+const shakingAnimation = [
   { transform: 'translateX(-4px)' },
   { transform: 'translateX(+4px)' },
   { transform: 'translateX(-4px)' },
@@ -64,22 +107,30 @@ const errorFeedbackAnimation = [
   { transform: 'translateX(0)' },
 ]
 
+/**
+ * Scale to 0 vertically.
+ */
 const scaleToZeroAnimation = [
   { transform: 'scaleY(100%)' },
   { transform: 'scaleY(0)' },
 ]
 
-// TODO: there has to be a reverse() method
-const scaleTo100 = [
+/**
+ * Scale to 100% vertically. Used in combination with <code>scaleToZeroAnimation</code>
+ */
+const scaleTo100Animation = [
   { transform: 'scaleY(100%)' },
 ]
 
-const fadeOut = [
+const fadeOutAnimation = [
   { opacity: 1 },
   { opacity: 0 }
 ]
 
-const successAnimation = [
+/**
+ * The elements “jumps”. Used when the user finds the right word.
+ */
+const jumpAnimation = [
   { transform: 'translateY(0)' },
   { transform: 'translateY(-30px)' },
   { transform: 'translateY(0)' }
@@ -90,7 +141,7 @@ const successAnimation = [
 /* ======================================== */
 
 /**
- * Create the header.
+ * Create the header with the title and the menu.
  */
 function createHeader() {
   const header = document.createElement('header')
@@ -125,6 +176,9 @@ function createHeader() {
   menu.style.gap = '0.9rem'
   menu.style.justifyContent = 'center'
 
+  /**
+   * The “Cheat” menu element contains the right word, which will be visible after clicking on it.
+   */
   const cheat = document.createElement('p')
   cheat.textContent = 'Cheat'
 
@@ -147,11 +201,9 @@ function createHeader() {
   about.style.textDecoration = 'underline'
   about.style.cursor = 'pointer'
 
-
   menu.insertAdjacentElement('beforeend', cheat)
   menu.insertAdjacentElement('beforeend', about)
   header.insertAdjacentElement('beforeend', menu)
-
 }
 createHeader()
 
@@ -239,9 +291,9 @@ const keys = {
  * @return - A css color.
  */
 function keyboardKeyBackground(letterStatus) {
-  if (letterStatus === wordIs.present) return getColorFromCSSVar('--color-present')
-  if (letterStatus === wordIs.notPresent) return getColorFromCSSVar('--color-absent')
-  if (letterStatus === wordIs.correct) return getColorFromCSSVar('--color-correct')
+  if (letterStatus === tokenIs.present) return getColorFromCSSVar('--color-present')
+  if (letterStatus === tokenIs.notPresent) return getColorFromCSSVar('--color-absent')
+  if (letterStatus === tokenIs.correct) return getColorFromCSSVar('--color-correct')
   return getColorFromCSSVar('--key-bg')
 }
 
@@ -348,7 +400,7 @@ function addLetter(letter) {
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
     boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
-    boxElement.animate(pressKeyFeedbackAnimation, 50)
+    boxElement.animate(addLetterFeedbackAnimation, 50)
   }
 }
 
@@ -375,10 +427,10 @@ function checkWord(word) {
   word = word.trim()
   if (typeof (word) !== 'string') throw Error('word must be a string.')
 
-  if (word === WORD) return wordIs.correct
-  if (wordleLa.has(word) || wordleTa.has(word)) return wordIs.present
-  if (word.length < 5) return wordIs.tooShort
-  else return wordIs.notPresent
+  if (word === WORD) return tokenIs.correct
+  if (wordleLa.has(word) || wordleTa.has(word)) return tokenIs.present
+  if (word.length < 5) return tokenIs.tooShort
+  else return tokenIs.notPresent
 }
 
 /**
@@ -394,12 +446,12 @@ function boxBackgroundColor(letter, i) {
 }
 
 /**
- * Updates the object with the current status for every key.
+ * Updates the keys object with the current status for every key.
  */
 function updateLetterInKeyboardObject(letter, i) {
-  if (WORD[i] === letter) return wordIs.correct
-  if (WORD.includes(letter)) return wordIs.present
-  return wordIs.notPresent
+  if (WORD[i] === letter) return tokenIs.correct
+  if (WORD.includes(letter)) return tokenIs.present
+  return tokenIs.notPresent
 }
 
 /**
@@ -412,12 +464,12 @@ async function boxFeedback(wordStatus) {
   const boxes = currentRowEl.querySelectorAll('div')
   const messagesCount = Array.from(notificationContainer.querySelectorAll('.message')).length
 
-  if (wordStatus === wordIs.notPresent) {
-    currentRowEl.animate(errorFeedbackAnimation, 300)
+  if (wordStatus === tokenIs.notPresent) {
+    currentRowEl.animate(shakingAnimation, 300)
     addAndRemoveNotification('Not in word list')
     GAME_STATE = 'PLAY'
-  } else if (wordStatus === wordIs.tooShort) {
-    currentRowEl.animate(errorFeedbackAnimation, 300)
+  } else if (wordStatus === tokenIs.tooShort) {
+    currentRowEl.animate(shakingAnimation, 300)
     GAME_STATE = 'PLAY'
 
     // Prevents adding too many notifications.
@@ -442,7 +494,7 @@ async function boxFeedback(wordStatus) {
         an.onfinish = (() => {
           box.style.backgroundColor = boxBackgroundColor(currentLetter, i);
           box.style.borderColor = boxBackgroundColor(currentLetter, i);
-          const revAn = box.animate(scaleTo100, { duration: 150, fill: 'forwards' })
+          const revAn = box.animate(scaleTo100Animation, { duration: 150, fill: 'forwards' })
           revAn.onfinish = () => resolve()
         })
       });
@@ -452,7 +504,7 @@ async function boxFeedback(wordStatus) {
 
     await animateLetters()
 
-    if (wordStatus === wordIs.correct) {
+    if (wordStatus === tokenIs.correct) {
 
       /**
        * Add the "correct word" animation.
@@ -461,7 +513,7 @@ async function boxFeedback(wordStatus) {
       function animateSuccess(i = 0) {
         if (i > 4) return;
 
-        const an = boxes[i].animate(successAnimation, {
+        const an = boxes[i].animate(jumpAnimation, {
           duration: 600, easing: 'cubic-bezier(0.6, -0.28, 0.74, 1.35)'
         });
 
@@ -476,7 +528,7 @@ async function boxFeedback(wordStatus) {
     boxes.forEach((box, i) => {
       const letter = box.textContent.toLowerCase()
 
-      if (keys[letter] !== wordIs.correct) {
+      if (keys[letter] !== tokenIs.correct) {
         keys[letter] = updateLetterInKeyboardObject(letter, i)
       }
     })
@@ -486,7 +538,7 @@ async function boxFeedback(wordStatus) {
     const isLastRow = CURRENT_ROW === ROWS - 1
 
     if (isLastRow) {
-      if (wordStatus === wordIs.present) {
+      if (wordStatus === tokenIs.present) {
         addAndRemoveNotification(capitalize(WORD), true)
       }
 
@@ -577,7 +629,7 @@ function removeNotifications() {
     if (i < 0) return
     if (elementAfterCurrent()) return
 
-    const an = message.animate(fadeOut, { duration: 100, fill: 'forwards' })
+    const an = message.animate(fadeOutAnimation, { duration: 100, fill: 'forwards' })
     an.play()
 
     an.onfinish = () => {
@@ -588,11 +640,9 @@ function removeNotifications() {
   removeMessagesInSequence(i)
 }
 
-
 /* ============================================ */
 /* ··········································· § TYPING ··· */
 /* ======================================== */
-
 /**
  * Check wether the modifier keys are pressed.
  * @return true of shift, cmd, ctrl or alt are pressed, false otherwise.
