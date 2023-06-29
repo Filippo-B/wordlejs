@@ -319,8 +319,6 @@ function generateKeyboard(keys) {
   keyboardContainer.style.maxWidth = '484px'
   keyboardContainer.style.height = '200px'
 
-  console.log(keyboardContainer.style)
-
   for (let letter of keysArr) {
     const key = document.createElement('div')
     if (letter === ' ') {
