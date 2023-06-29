@@ -38,11 +38,8 @@ body,
 a {
   color: var(--color-tone-11);
 }
-body {
-  background-color: var(--black);
-  font-family: 'Rubik', Arial, Helvetica, sans-serif;
-}
 
-.square {
-  background-color: khaki;
+body {
+  font-family: 'Rubik', Arial, Helvetica, sans-serif;
+  background-color: var(--black);
 }
