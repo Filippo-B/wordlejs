@@ -196,7 +196,7 @@ function createHeader() {
 
   const about = document.createElement('a')
   about.textContent = 'More about this project'
-  about.href = '/'
+  about.href = 'https://github.com/Filippo-B/wordlejs'
 
   about.style.textDecoration = 'underline'
   about.style.cursor = 'pointer'
