@@ -1,3 +1,5 @@
+// FIXME: When i reload a page and the game is half-filled, It's not possible to continue playing
+// FIXME: When i reload a page and the game is half-filled, color feedback on grid and table does not work
 'use strict'
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
@@ -31,11 +33,6 @@ let CURRENT_ROW = 0
  */
 let GAME_STATE = 'PLAY'
 
-function populateLocalStorage() {
-  if (getWordTrackerFromLS() === null) {
-    setWordTrackerInLS(generateCleanWordTracker())
-  }
-}
 populateLocalStorage()
 
 /**
@@ -675,6 +672,41 @@ window.addEventListener('keydown', (e) => {
 })
 
 /* ============================================ */
+/* ··········································· § LOCALSTORAGE ··· */
+/* ======================================== */
+/**
+ * Gets the word tracker from local storage.
+ * @returns {Array} - Word tracker array
+ */
+function getWordTrackerFromLS() {
+  return JSON.parse(window.localStorage.getItem('wordTracker'))
+}
+
+/**
+ * Sets the word tracker in local storage.
+ * @param {Array}: The two-dimensional array for word tracker
+ */
+function setWordTrackerInLS(wordTracker) {
+  window.localStorage.setItem('wordTracker', JSON.stringify(wordTracker))
+}
+
+/**
+ * Generates a clean word tracker.
+ * @returns {Array} A clean word tracker array
+ */
+function generateCleanWordTracker() {
+  return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
+}
+/**
+ * Populate the localStorage with a clean word tracker if the localStorage is empty
+ */
+function populateLocalStorage() {
+  if (getWordTrackerFromLS() === null) {
+    setWordTrackerInLS(generateCleanWordTracker())
+  }
+}
+
+/* ============================================ */
 /* ··········································· § UTILS ··· */
 /* ======================================== */
 /**
@@ -703,28 +735,4 @@ function capitalize(string) {
   const arr = string.split(' ')
   const firstCapital = arr.map(str => str[0].toUpperCase() + str.slice(1))
   return firstCapital.join(' ')
-}
-
-/**
- * Gets the word tracker from local storage.
- * @returns {Array} - Word tracker array
- */
-function getWordTrackerFromLS() {
-  return JSON.parse(window.localStorage.getItem('wordTracker'))
-}
-
-/**
- * Sets the word tracker in local storage.
- * @param {Array}: The two-dimensional array for word tracker
- */
-function setWordTrackerInLS(wordTracker) {
-  window.localStorage.setItem('wordTracker', JSON.stringify(wordTracker))
-}
-
-/**
- * Generates a clean word tracker.
- * @returns {Array} A clean word tracker array
- */
-function generateCleanWordTracker() {
-  return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
 }
