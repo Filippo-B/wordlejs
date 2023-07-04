@@ -552,6 +552,7 @@ async function boxFeedback(wordStatus) {
       CURRENT_ROW++
       GAME_STATE = 'PLAY'
     }
+    setWordTrackerInLS(wordTracker)
   }
 }
 
