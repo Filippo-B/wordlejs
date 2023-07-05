@@ -1,14 +1,15 @@
 // FIXME: When i reload a page and the game is half-filled, It's not possible to continue playing
 // FIXME: When i reload a page and the game is half-filled, color feedback on grid and table does not work
+// TODO: add word to localstorage
 'use strict'
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
-
 /**
  * The word the user has to guess. It's generated with `selectRandomWord()`,
  */
-const WORD = selectRandomWord()
+// const WORD = selectRandomWord()
+const WORD = 'panic'
 
 /**
  * @constant
@@ -22,17 +23,6 @@ const ROWS = 6;
  */
 const COLS = 5;
 
-/**
- * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
- * @constant
- */
-let CURRENT_ROW = 0
-
-/**
- * The state of the game. Can be "PLAY" or "END"
- */
-let GAME_STATE = 'PLAY'
-
 populateLocalStorage()
 
 /**
@@ -40,6 +30,18 @@ populateLocalStorage()
  */
 const wordTracker = getWordTrackerFromLS()
 // console.log(wordTracker)
+
+/**
+ * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
+ * @constant
+ */
+let CURRENT_ROW = wordTracker.findIndex(a => a[0] === '')
+console.log()
+
+/**
+ * The state of the game. Can be "PLAY" or "END"
+ */
+let GAME_STATE = CURRENT_ROW + 1 === ROWS ? 'END' : 'PLAY'
 
 let headerContainer = null
 let wordleContainer = null
@@ -258,6 +260,7 @@ function generateGrid() {
     wordleContainer.insertAdjacentElement('beforeend', row)
 
     for (let j = 0; j < COLS; j++) {
+      const currentLetter = wordTracker[i][j]
       const box = document.createElement('div')
       box.style.width = '100%'
       box.style.height = '100%'
@@ -267,8 +270,10 @@ function generateGrid() {
       box.style.alignItems = 'center'
       box.style.textTransform = 'uppercase'
       box.style.fontSize = '2rem'
+      box.style.backgroundColor = boxBackgroundColor(currentLetter, j);
+      box.style.borderColor = boxBackgroundColor(currentLetter, j);
 
-      box.textContent = wordTracker[i][j]
+      box.textContent = currentLetter
       box.setAttribute('data-box', `${i},${j}`)
       row.insertAdjacentElement('beforeend', box)
     }
@@ -442,9 +447,11 @@ function checkWord(word) {
  * @returns {string} - The color.
  */
 function boxBackgroundColor(letter, i) {
-  if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
-  if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
-  return getColorFromCSSVar('--color-absent')
+  if (letter !== '') {
+    if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
+    if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
+    return getColorFromCSSVar('--color-absent')
+  }
 }
 
 /**
@@ -736,3 +743,5 @@ function capitalize(string) {
   const firstCapital = arr.map(str => str[0].toUpperCase() + str.slice(1))
   return firstCapital.join(' ')
 }
+
+
