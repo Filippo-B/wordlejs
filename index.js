@@ -1,5 +1,3 @@
-// FIXME: When i reload a page and the game is half-filled, It's not possible to continue playing
-// FIXME: When i reload a page and the game is half-filled, color feedback on grid and table does not work
 // TODO: add word to localstorage
 'use strict'
 import { wordleLa } from './wordleLa.js'
@@ -71,6 +69,15 @@ const tokenIs = {
 }
 
 const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" /> </svg>`
+
+/**
+ * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
+ */
+const keys = {
+  'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
+  ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
+  'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
+}
 
 /**
  * @return  A random word from the list of valid words.
@@ -272,6 +279,7 @@ function generateGrid() {
       box.style.fontSize = '2rem'
       box.style.backgroundColor = boxBackgroundColor(currentLetter, j);
       box.style.borderColor = boxBackgroundColor(currentLetter, j);
+      keys[currentLetter] = updateLetterInKeyboardObject(currentLetter, j)
 
       box.textContent = currentLetter
       box.setAttribute('data-box', `${i},${j}`)
@@ -285,14 +293,6 @@ generateGrid()
 /* ============================================ */
 /* ··········································· § Keyboard ··· */
 /* ======================================== */
-/**
- * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
- */
-const keys = {
-  'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
-  ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
-  'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
-}
 
 /**
  * Returns the appropriate css color based on the current letter status
@@ -391,6 +391,8 @@ function keyboardClickEvent() {
   })
 }
 
+
+console.log(keys)
 generateKeyboard(keys)
 keyboardClickEvent()
 /* ============================================ */
@@ -458,9 +460,12 @@ function boxBackgroundColor(letter, i) {
  * Updates the keys object with the current status for every key.
  */
 function updateLetterInKeyboardObject(letter, i) {
-  if (WORD[i] === letter) return tokenIs.correct
-  if (WORD.includes(letter)) return tokenIs.present
-  return tokenIs.notPresent
+  if (keys[letter] !== tokenIs.correct) {
+    if (WORD[i] === letter) return tokenIs.correct
+    if (WORD.includes(letter) && keys[letter]) return tokenIs.present
+    return tokenIs.notPresent
+  }
+  return tokenIs.correct
 }
 
 /**
