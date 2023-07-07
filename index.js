@@ -718,6 +718,24 @@ function populateLocalStorage() {
   }
 }
 
+function getGameObjFromLS() {
+  return JSON.parse(window.localStorage.getItem('gameObj'))
+}
+
+function saveGameObjToLS(gameObj) {
+  window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
+}
+
+function addCleanGameObjToLS() {
+  const gameObj = {
+    currentRow: 0,
+    gameState: 'PLAY',
+    word: selectRandomWord(),
+    wordTracker: generateCleanWordTracker()
+  }
+  window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
+}
+
 /* ============================================ */
 /* ··········································· § UTILS ··· */
 /* ======================================== */
