@@ -150,7 +150,7 @@ function createHeader() {
   title.style.fontWeight = '700'
 
   const subtitle = document.createElement('p')
-  subtitle.innerHTML = 'A Wordle clone in vanilla JS by <a href="https://github.com/Filippo-b">Filippo Bistot</a>'
+  subtitle.innerHTML = 'A Wordle clone in vanilla JS by <a href="https://github.com/Filippo-b">Filippo Bristot</a>'
   header.insertAdjacentElement('afterbegin', subtitle)
   header.insertAdjacentElement('afterbegin', title)
 
@@ -189,6 +189,7 @@ function createHeader() {
   const newGame = document.createElement('p')
   newGame.textContent = 'New game'
   newGame.style.textDecoration = 'underline'
+  newGame.style.cursor = 'pointer'
 
   newGame.addEventListener('click', () => {
     startNewGame()
