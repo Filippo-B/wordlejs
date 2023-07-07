@@ -7,7 +7,7 @@ const root = document.getElementById('root');
  * The word the user has to guess. It's generated with `selectRandomWord()`,
  */
 // const WORD = selectRandomWord()
-const WORD = 'panic'
+// const WORD = 'panic'
 const ROWS = 6;
 const COLS = 5;
 if (!getGameObjFromLS()) {
@@ -27,13 +27,7 @@ const gameObj = getGameObjFromLS()
  * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
  * @constant
  */
-let CURRENT_ROW = gameObj.wordTracker.findIndex(a => a[0] === '')
-console.log()
-
-/**
- * The state of the game. Can be "PLAY" or "END"
- */
-let GAME_STATE = CURRENT_ROW + 1 === ROWS ? 'END' : 'PLAY'
+// let CURRENT_ROW = gameObj.wordTracker.findIndex(a => a[0] === '')
 
 let headerContainer = null
 let wordleContainer = null
@@ -193,9 +187,9 @@ function createHeader() {
   cheat.style.cursor = 'pointer'
 
   cheat.addEventListener('click', () => {
-    if (cheat.textContent !== WORD) {
+    if (cheat.textContent !== gameObj.word) {
 
-      cheat.textContent = capitalize(WORD) + ' 😜'
+      cheat.textContent = capitalize(gameObj.word) + ' 😜'
       cheat.style.textDecoration = 'unset'
     }
 
@@ -374,7 +368,7 @@ function keyboardClickEvent() {
 
     if (key) {
       if (key === 'enter') {
-        const currentWord = gameObj.wordTracker[CURRENT_ROW].join('')
+        const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
         boxFeedback(checkWord(currentWord))
       } else if (key === 'back') {
         removeLetter()
@@ -396,11 +390,11 @@ keyboardClickEvent()
  * Adds a letter to the first empty box of the active row.
  */
 function addLetter(letter) {
-  const firstEmptySpace = gameObj.wordTracker[CURRENT_ROW].indexOf('')
+  const firstEmptySpace = gameObj.wordTracker[gameObj.currentRow].indexOf('')
 
   if (firstEmptySpace !== -1) {
-    gameObj.wordTracker[CURRENT_ROW][firstEmptySpace] = letter
-    const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
+    gameObj.wordTracker[gameObj.currentRow][firstEmptySpace] = letter
+    const boxElement = document.querySelector(`[data-box="${gameObj.currentRow},${firstEmptySpace}"]`)
     boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
     boxElement.animate(addLetterFeedbackAnimation, 50)
@@ -411,11 +405,11 @@ function addLetter(letter) {
  * Removes the last letter of the active row.
  */
 function removeLetter() {
-  const lastLetter = gameObj.wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
+  const lastLetter = gameObj.wordTracker[gameObj.currentRow].findLastIndex(l => l !== '')
 
   if (lastLetter !== -1) {
-    gameObj.wordTracker[CURRENT_ROW][lastLetter] = ''
-    const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${lastLetter}"]`)
+    gameObj.wordTracker[gameObj.currentRow][lastLetter] = ''
+    const boxElement = document.querySelector(`[data-box="${gameObj.currentRow},${lastLetter}"]`)
     boxElement.textContent = ''
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-absent')}`
   }
@@ -430,7 +424,7 @@ function checkWord(word) {
   word = word.trim()
   if (typeof (word) !== 'string') throw Error('word must be a string.')
 
-  if (word === WORD) return tokenIs.correct
+  if (word === gameObj.word) return tokenIs.correct
   if (wordleLa.has(word) || wordleTa.has(word)) return tokenIs.present
   if (word.length < 5) return tokenIs.tooShort
   else return tokenIs.notPresent
@@ -444,8 +438,8 @@ function checkWord(word) {
  */
 function boxBackgroundColor(letter, i) {
   if (letter !== '') {
-    if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
-    if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
+    if (gameObj.word[i] === letter) return getColorFromCSSVar('--color-correct')
+    if (gameObj.word.includes(letter)) return getColorFromCSSVar('--color-present')
     return getColorFromCSSVar('--color-absent')
   }
 }
@@ -455,8 +449,8 @@ function boxBackgroundColor(letter, i) {
  */
 function updateLetterInKeyboardObject(letter, i) {
   if (keys[letter] !== tokenIs.correct) {
-    if (WORD[i] === letter) return tokenIs.correct
-    if (WORD.includes(letter) && keys[letter]) return tokenIs.present
+    if (gameObj.word[i] === letter) return tokenIs.correct
+    if (gameObj.word.includes(letter) && keys[letter]) return tokenIs.present
     return tokenIs.notPresent
   }
   return tokenIs.correct
@@ -467,18 +461,18 @@ function updateLetterInKeyboardObject(letter, i) {
  * @param {string} wordStatus - Whether the word is correct, present or not present
  */
 async function boxFeedback(wordStatus) {
-  GAME_STATE = 'WAIT'
-  const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
+  gameObj.gameState = 'WAIT'
+  const currentRowEl = document.querySelector(`[data-row="${gameObj.currentRow}"`)
   const boxes = currentRowEl.querySelectorAll('div')
   const messagesCount = Array.from(notificationContainer.querySelectorAll('.message')).length
 
   if (wordStatus === tokenIs.notPresent) {
     currentRowEl.animate(shakingAnimation, 300)
     addAndRemoveNotification('Not in word list')
-    GAME_STATE = 'PLAY'
+    gameObj.gameState = 'PLAY'
   } else if (wordStatus === tokenIs.tooShort) {
     currentRowEl.animate(shakingAnimation, 300)
-    GAME_STATE = 'PLAY'
+    gameObj.gameState = 'PLAY'
 
     // Prevents adding too many notifications.
     if (messagesCount <= 10) {
@@ -530,7 +524,7 @@ async function boxFeedback(wordStatus) {
       }
 
       setTimeout(animateSuccess, 500)
-      GAME_STATE = 'END';
+      gameObj.gameState = 'END';
     }
 
     boxes.forEach((box, i) => {
@@ -543,18 +537,21 @@ async function boxFeedback(wordStatus) {
 
     generateKeyboard(keys)
 
-    const isLastRow = CURRENT_ROW === ROWS - 1
+    const isLastRow = gameObj.currentRow === ROWS - 1
 
-    if (isLastRow) {
-      if (wordStatus === tokenIs.present) {
-        addAndRemoveNotification(capitalize(WORD), true)
+    if (gameObj.gameState !== 'END') {
+      if (isLastRow) {
+        if (wordStatus === tokenIs.present) {
+          addAndRemoveNotification(capitalize(gameObj.word), true)
+        }
+
+        gameObj.gameState = 'END'
+      } else {
+        gameObj.currentRow++
+        gameObj.gameState = 'PLAY'
       }
-
-      GAME_STATE = 'END'
-    } else {
-      CURRENT_ROW++
-      GAME_STATE = 'PLAY'
     }
+
     setWordTrackerInLS(gameObj.wordTracker)
     saveGameObjToLS(gameObj)
   }
@@ -666,13 +663,13 @@ function modifierState(e) {
 
 window.addEventListener('keydown', (e) => {
   // console.log(e.key)
-  if (GAME_STATE === 'PLAY' && modifierState(e)) {
+  if (gameObj.gameState === 'PLAY' && modifierState(e)) {
     if (isValidLetter(e.key)) {
       addLetter(e.key)
     } else if (e.key === 'Backspace') {
       removeLetter(e)
     } else if (e.key === 'Enter') {
-      const currentWord = gameObj.wordTracker[CURRENT_ROW].join('')
+      const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
       boxFeedback(checkWord(currentWord))
     }
   }
