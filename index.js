@@ -8,17 +8,7 @@ const root = document.getElementById('root');
  */
 // const WORD = selectRandomWord()
 const WORD = 'panic'
-
-/**
- * @constant
- * @default
- */
 const ROWS = 6;
-
-/**
- * @constant
- * @default
- */
 const COLS = 5;
 if (!getGameObjFromLS()) {
   addCleanGameObjToLS()
@@ -26,19 +16,18 @@ if (!getGameObjFromLS()) {
 
 const gameObj = getGameObjFromLS()
 
-populateLocalStorage()
 
 /**
  * A 2d array that forms a 5x6 grid, representing the Wordle grid. This gets updated as the user plays. 
  */
-const wordTracker = getWordTrackerFromLS()
+// const wordTracker = getWordTrackerFromLS()
 // console.log(wordTracker)
 
 /**
  * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
  * @constant
  */
-let CURRENT_ROW = wordTracker.findIndex(a => a[0] === '')
+let CURRENT_ROW = gameObj.wordTracker.findIndex(a => a[0] === '')
 console.log()
 
 /**
@@ -272,7 +261,7 @@ function generateGrid() {
     wordleContainer.insertAdjacentElement('beforeend', row)
 
     for (let j = 0; j < COLS; j++) {
-      const currentLetter = wordTracker[i][j]
+      const currentLetter = gameObj.wordTracker[i][j]
       const box = document.createElement('div')
       box.style.width = '100%'
       box.style.height = '100%'
@@ -385,7 +374,7 @@ function keyboardClickEvent() {
 
     if (key) {
       if (key === 'enter') {
-        const currentWord = wordTracker[CURRENT_ROW].join('')
+        const currentWord = gameObj.wordTracker[CURRENT_ROW].join('')
         boxFeedback(checkWord(currentWord))
       } else if (key === 'back') {
         removeLetter()
@@ -407,10 +396,10 @@ keyboardClickEvent()
  * Adds a letter to the first empty box of the active row.
  */
 function addLetter(letter) {
-  const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
+  const firstEmptySpace = gameObj.wordTracker[CURRENT_ROW].indexOf('')
 
   if (firstEmptySpace !== -1) {
-    wordTracker[CURRENT_ROW][firstEmptySpace] = letter
+    gameObj.wordTracker[CURRENT_ROW][firstEmptySpace] = letter
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
     boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
@@ -422,10 +411,10 @@ function addLetter(letter) {
  * Removes the last letter of the active row.
  */
 function removeLetter() {
-  const lastLetter = wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
+  const lastLetter = gameObj.wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
 
   if (lastLetter !== -1) {
-    wordTracker[CURRENT_ROW][lastLetter] = ''
+    gameObj.wordTracker[CURRENT_ROW][lastLetter] = ''
     const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${lastLetter}"]`)
     boxElement.textContent = ''
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-absent')}`
@@ -566,7 +555,8 @@ async function boxFeedback(wordStatus) {
       CURRENT_ROW++
       GAME_STATE = 'PLAY'
     }
-    setWordTrackerInLS(wordTracker)
+    setWordTrackerInLS(gameObj.wordTracker)
+    saveGameObjToLS(gameObj)
   }
 }
 
@@ -682,7 +672,7 @@ window.addEventListener('keydown', (e) => {
     } else if (e.key === 'Backspace') {
       removeLetter(e)
     } else if (e.key === 'Enter') {
-      const currentWord = wordTracker[CURRENT_ROW].join('')
+      const currentWord = gameObj.wordTracker[CURRENT_ROW].join('')
       boxFeedback(checkWord(currentWord))
     }
   }
