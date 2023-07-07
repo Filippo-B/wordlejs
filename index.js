@@ -1,3 +1,4 @@
+// FIXME: keyboard keys does not update correctly; the color bg is wrong in some situations
 'use strict'
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
@@ -44,7 +45,7 @@ const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/sv
 /**
  * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
  */
-const keys = {
+let keys = {
   'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
   ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
   'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
@@ -185,6 +186,15 @@ function createHeader() {
   about.style.textDecoration = 'underline'
   about.style.cursor = 'pointer'
 
+  const newGame = document.createElement('p')
+  newGame.textContent = 'New game'
+  newGame.style.textDecoration = 'underline'
+
+  newGame.addEventListener('click', () => {
+    startNewGame()
+  })
+
+  menu.insertAdjacentElement('beforeend', newGame)
   menu.insertAdjacentElement('beforeend', cheat)
   menu.insertAdjacentElement('beforeend', about)
   header.insertAdjacentElement('beforeend', menu)
@@ -545,7 +555,7 @@ async function boxFeedback(wordStatus) {
 function createNotificationContainer() {
   const modal = document.createElement('div')
   modal.style.position = 'absolute'
-  modal.style.top = '70px'
+  modal.style.top = '120px'
   modal.style.width = '100%'
   modal.style.display = 'flex'
   modal.style.flexDirection = 'column'
@@ -624,6 +634,21 @@ function removeNotifications() {
     }
   }
   removeMessagesInSequence(i)
+}
+
+function startNewGame() {
+  keys = {
+    'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
+    ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
+    'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
+  }
+  addCleanGameObjToLS()
+  gameObj = getGameObjFromLS()
+  document.getElementById('wordleContainer').innerHTML = ''
+  document.getElementById('keyboardContainer').innerHTML = ''
+
+  generateGrid()
+  generateKeyboard(keys)
 }
 
 /* ============================================ */
