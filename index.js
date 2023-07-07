@@ -551,8 +551,6 @@ async function boxFeedback(wordStatus) {
         gameObj.gameState = 'PLAY'
       }
     }
-
-    setWordTrackerInLS(gameObj.wordTracker)
     saveGameObjToLS(gameObj)
   }
 }
@@ -678,21 +676,6 @@ window.addEventListener('keydown', (e) => {
 /* ============================================ */
 /* ··········································· § LOCALSTORAGE ··· */
 /* ======================================== */
-/**
- * Gets the word tracker from local storage.
- * @returns {Array} - Word tracker array
- */
-function getWordTrackerFromLS() {
-  return JSON.parse(window.localStorage.getItem('wordTracker'))
-}
-
-/**
- * Sets the word tracker in local storage.
- * @param {Array}: The two-dimensional array for word tracker
- */
-function setWordTrackerInLS(wordTracker) {
-  window.localStorage.setItem('wordTracker', JSON.stringify(wordTracker))
-}
 
 /**
  * Generates a clean word tracker.
@@ -700,14 +683,6 @@ function setWordTrackerInLS(wordTracker) {
  */
 function generateCleanWordTracker() {
   return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
-}
-/**
- * Populate the localStorage with a clean word tracker if the localStorage is empty
- */
-function populateLocalStorage() {
-  if (getWordTrackerFromLS() === null) {
-    setWordTrackerInLS(generateCleanWordTracker())
-  }
 }
 
 function getGameObjFromLS() {
