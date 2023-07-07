@@ -20,6 +20,11 @@ const ROWS = 6;
  * @default
  */
 const COLS = 5;
+if (!getGameObjFromLS()) {
+  addCleanGameObjToLS()
+}
+
+const gameObj = getGameObjFromLS()
 
 populateLocalStorage()
 
