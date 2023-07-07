@@ -1,33 +1,16 @@
-// TODO: add word to localstorage
 'use strict'
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
-/**
- * The word the user has to guess. It's generated with `selectRandomWord()`,
- */
-// const WORD = selectRandomWord()
-// const WORD = 'panic'
+
 const ROWS = 6;
 const COLS = 5;
+
 if (!getGameObjFromLS()) {
   addCleanGameObjToLS()
 }
 
-const gameObj = getGameObjFromLS()
-
-
-/**
- * A 2d array that forms a 5x6 grid, representing the Wordle grid. This gets updated as the user plays. 
- */
-// const wordTracker = getWordTrackerFromLS()
-// console.log(wordTracker)
-
-/**
- * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
- * @constant
- */
-// let CURRENT_ROW = gameObj.wordTracker.findIndex(a => a[0] === '')
+let gameObj = getGameObjFromLS()
 
 let headerContainer = null
 let wordleContainer = null
@@ -379,8 +362,6 @@ function keyboardClickEvent() {
   })
 }
 
-
-console.log(keys)
 generateKeyboard(keys)
 keyboardClickEvent()
 /* ============================================ */
@@ -685,14 +666,24 @@ function generateCleanWordTracker() {
   return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
 }
 
+/**
+ * Gets the game object from local storage.
+ */
 function getGameObjFromLS() {
   return JSON.parse(window.localStorage.getItem('gameObj'))
 }
 
+/**
+ * Saves the game object to local storage.
+ * @param {Object} gameObj - The game object to save.
+ */
 function saveGameObjToLS(gameObj) {
   window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
 }
 
+/**
+ * Adds a clean game object to local storage.
+ */
 function addCleanGameObjToLS() {
   const gameObj = {
     currentRow: 0,
@@ -702,7 +693,6 @@ function addCleanGameObjToLS() {
   }
   window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
 }
-
 /* ============================================ */
 /* ··········································· § UTILS ··· */
 /* ======================================== */
