@@ -668,6 +668,7 @@ function startNewGame() {
   const cheatMenu = document.getElementById('cheatMenu')
   cheatMenu.textContent = 'Cheat'
   cheatMenu.style.textDecoration = 'underline'
+  document.getElementById('notificationContainer').innerHTML = ''
 
   generateGrid()
   generateKeyboard(keys)
