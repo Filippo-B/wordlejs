@@ -1,4 +1,3 @@
-// FIXME: keyboard keys does not update correctly; the color bg is wrong in some situations
 'use strict'
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
@@ -442,7 +441,7 @@ function boxBackgroundColor(letter, i) {
 function updateLetterInKeyboardObject(letter, i) {
   if (keys[letter] !== tokenIs.correct) {
     if (gameObj.word[i] === letter) return tokenIs.correct
-    if (gameObj.word.includes(letter) && keys[letter]) return tokenIs.present
+    if (gameObj.word.includes(letter)) return tokenIs.present
     return tokenIs.notPresent
   }
   return tokenIs.correct
