@@ -104,6 +104,7 @@ const shakingAnimation = [
 
 /**
  * Scale to 0 vertically.
+ * @type {Array.<object>}
  */
 const scaleToZeroAnimation = [
   { transform: 'scaleY(100%)' },
@@ -112,6 +113,7 @@ const scaleToZeroAnimation = [
 
 /**
  * Scale to 100% vertically. Used in combination with <code>scaleToZeroAnimation</code>
+ * @type {Array.<object>}
  */
 const scaleTo100Animation = [
   { transform: 'scaleY(100%)' },
