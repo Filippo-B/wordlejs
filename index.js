@@ -1,4 +1,19 @@
 'use strict'
+/**
+ * @typedef {Object} GameObject
+ * @property {number} currentRow - the current row of the game
+ * @property {number} gameState - the current state of the game
+ * @property {string} word - the current word of the game
+ * @property {Array} wordTracker - The array that keeps track of the letters in the word
+ */
+
+/**
+ * @typedef {Object} TokenStatus
+ * @property {string} correct - the letter is present in the word, and at the right place
+ * @property {string} present - the word is present in a list, but it's not the correct
+ * @property {string} notPresent - the word is not present in a list
+ * @property {string} tooShort - the word is less than 5 letters long
+ */
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
@@ -6,10 +21,16 @@ const root = document.getElementById('root');
 const ROWS = 6;
 const COLS = 5;
 
+// Create the game object if it doesn't already exist
 if (!getGameObjFromLS()) {
   addCleanGameObjToLS()
 }
 
+/**
+ * @constant
+ * @type {GameObject}
+ * Get the game object from local storage.
+ */
 let gameObj = getGameObjFromLS()
 
 let headerContainer = null
@@ -19,18 +40,8 @@ let notificationContainer = null
 let keyboardContainer = null
 
 /**
- * All the statuses of a word or letter: 
- * - `correct`: 
- *   - the letter is present in the word, and at the right place
- *   - the word is the correct one
- * - `present`: the word is present in a list, but it's not the correct one
- *   - the letter is in the word, but in another place
- *   - the word is in a list, but is not the correct word
- * - `notPresent`: the word is not in the lists of acceptable words
- *   - the letter isn't in the word
- *   - the word isn't in any list
- * - `tooShort`: the word is less than 5 letters long
- * @summary The status of a word or letter
+* @type {TokenStatus}
+ * The status of a word or letter
  */
 const tokenIs = {
   correct: 'correct',
@@ -172,7 +183,6 @@ function createHeader() {
 
   cheat.addEventListener('click', () => {
     if (cheat.textContent !== gameObj.word) {
-
       cheat.textContent = capitalize(gameObj.word) + ' 😜'
       cheat.style.textDecoration = 'unset'
     }
@@ -380,6 +390,7 @@ keyboardClickEvent()
 /* ======================================== */
 /**
  * Adds a letter to the first empty box of the active row.
+ * @param {string} letter - The letter to add.
  */
 function addLetter(letter) {
   const firstEmptySpace = gameObj.wordTracker[gameObj.currentRow].indexOf('')
@@ -438,6 +449,8 @@ function boxBackgroundColor(letter, i) {
 
 /**
  * Updates the keys object with the current status for every key.
+ * @param {string} letter - The letter to check.
+ * @param {number} i - The index.   
  */
 function updateLetterInKeyboardObject(letter, i) {
   if (keys[letter] !== tokenIs.correct) {
@@ -637,6 +650,9 @@ function removeNotifications() {
   removeMessagesInSequence(i)
 }
 
+/**
+ * Reset the current game and start a new one.
+ */
 function startNewGame() {
   keys = {
     'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
@@ -660,7 +676,7 @@ function startNewGame() {
 /* ======================================== */
 /**
  * Check wether the modifier keys are pressed.
- * @return true of shift, cmd, ctrl or alt are pressed, false otherwise.
+ * @return {Boolean} true of shift, cmd, ctrl or alt are pressed, false otherwise.
  */
 function modifierState(e) {
   return !e.altKey
@@ -686,15 +702,6 @@ window.addEventListener('keydown', (e) => {
 /* ============================================ */
 /* ··········································· § LOCALSTORAGE ··· */
 /* ======================================== */
-
-/**
- * Generates a clean word tracker.
- * @returns {Array} A clean word tracker array
- */
-function generateCleanWordTracker() {
-  return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
-}
-
 /**
  * Gets the game object from local storage.
  */
@@ -722,6 +729,7 @@ function addCleanGameObjToLS() {
   }
   window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
 }
+
 /* ============================================ */
 /* ··········································· § UTILS ··· */
 /* ======================================== */
@@ -753,4 +761,10 @@ function capitalize(string) {
   return firstCapital.join(' ')
 }
 
-
+/**
+ * Generates a clean word tracker.
+ * @returns {Array} A clean word tracker array
+ */
+function generateCleanWordTracker() {
+  return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
+}
