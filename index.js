@@ -165,6 +165,7 @@ function createHeader() {
    */
   const cheat = document.createElement('p')
   cheat.textContent = 'Cheat'
+  cheat.id = 'cheatMenu'
 
   cheat.style.textDecoration = 'underline'
   cheat.style.cursor = 'pointer'
@@ -646,6 +647,9 @@ function startNewGame() {
   gameObj = getGameObjFromLS()
   document.getElementById('wordleContainer').innerHTML = ''
   document.getElementById('keyboardContainer').innerHTML = ''
+  const cheatMenu = document.getElementById('cheatMenu')
+  cheatMenu.textContent = 'Cheat'
+  cheatMenu.style.textDecoration = 'underline'
 
   generateGrid()
   generateKeyboard(keys)
