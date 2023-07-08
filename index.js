@@ -2,7 +2,7 @@
 /**
  * @typedef {Object} GameObject
  * @property {number} currentRow - the current row of the game
- * @property {number} gameState - the current state of the game
+ * @property {string} gameState - the current state of the game
  * @property {string} word - the current word of the game
  * @property {Array} wordTracker - The array that keeps track of the letters in the word
  */
@@ -691,7 +691,7 @@ window.addEventListener('keydown', (e) => {
     if (isValidLetter(e.key)) {
       addLetter(e.key)
     } else if (e.key === 'Backspace') {
-      removeLetter(e)
+      removeLetter()
     } else if (e.key === 'Enter') {
       const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
       boxFeedback(checkWord(currentWord))
@@ -714,6 +714,7 @@ function getGameObjFromLS() {
  * @param {Object} gameObj - The game object to save.
  */
 function saveGameObjToLS(gameObj) {
+  if (!gameObj) throw new Error('No game object to save.')
   window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
 }
 
