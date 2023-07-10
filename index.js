@@ -1,41 +1,37 @@
 'use strict'
+/**
+ * @typedef {Object} GameObject
+ * @property {number} currentRow - the current row of the game
+ * @property {string} gameState - the current state of the game
+ * @property {string} word - the current word of the game
+ * @property {Array} wordTracker - The array that keeps track of the letters in the word
+ */
+
+/**
+ * @typedef {Object} TokenStatus
+ * @property {string} correct - the letter is present in the word, and at the right place
+ * @property {string} present - the word is present in a list, but it's not the correct
+ * @property {string} notPresent - the word is not present in a list
+ * @property {string} tooShort - the word is less than 5 letters long
+ */
 import { wordleLa } from './wordleLa.js'
 import { wordleTa } from './wordleTa.js'
 const root = document.getElementById('root');
 
-/**
- * The word the user has to guess. It's generated with `selectRandomWord()`,
- */
-const WORD = selectRandomWord()
-
-/**
- * @constant
- * @default
- */
 const ROWS = 6;
-
-/**
- * @constant
- * @default
- */
 const COLS = 5;
 
+// Create the game object if it doesn't already exist
+if (!getGameObjFromLS()) {
+  addCleanGameObjToLS()
+}
+
 /**
- * The row where the addition and removal of letters take place. This value will increase as the user inputs present words (see `wordIs`).
  * @constant
+ * @type {GameObject}
+ * Get the game object from local storage.
  */
-let CURRENT_ROW = 0
-
-/**
- * The state of the game. Can be "PLAY" or "END"
- */
-let GAME_STATE = 'PLAY'
-
-/**
- * A 2d array that forms a 5x6 grid, representing the Wordle grid. This gets updated as the user plays. 
- */
-const wordTracker = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
-// console.log(wordTracker)
+let gameObj = getGameObjFromLS()
 
 let headerContainer = null
 let wordleContainer = null
@@ -44,18 +40,8 @@ let notificationContainer = null
 let keyboardContainer = null
 
 /**
- * All the statuses of a word or letter: 
- * - `correct`: 
- *   - the letter is present in the word, and at the right place
- *   - the word is the correct one
- * - `present`: the word is present in a list, but it's not the correct one
- *   - the letter is in the word, but in another place
- *   - the word is in a list, but is not the correct word
- * - `notPresent`: the word is not in the lists of acceptable words
- *   - the letter isn't in the word
- *   - the word isn't in any list
- * - `tooShort`: the word is less than 5 letters long
- * @summary The status of a word or letter
+* @type {TokenStatus}
+ * The status of a word or letter
  */
 const tokenIs = {
   correct: 'correct',
@@ -65,6 +51,15 @@ const tokenIs = {
 }
 
 const backSpaceSVG = `<svg style="width:1.5rem" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" /> </svg>`
+
+/**
+ * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
+ */
+let keys = {
+  'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
+  ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
+  'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
+}
 
 /**
  * @return  A random word from the list of valid words.
@@ -109,6 +104,7 @@ const shakingAnimation = [
 
 /**
  * Scale to 0 vertically.
+ * @type {Array.<object>}
  */
 const scaleToZeroAnimation = [
   { transform: 'scaleY(100%)' },
@@ -117,6 +113,7 @@ const scaleToZeroAnimation = [
 
 /**
  * Scale to 100% vertically. Used in combination with <code>scaleToZeroAnimation</code>
+ * @type {Array.<object>}
  */
 const scaleTo100Animation = [
   { transform: 'scaleY(100%)' },
@@ -165,7 +162,7 @@ function createHeader() {
   title.style.fontWeight = '700'
 
   const subtitle = document.createElement('p')
-  subtitle.innerHTML = 'A Wordle clone in vanilla JS by <a href="https://github.com/Filippo-b">Filippo Bistot</a>'
+  subtitle.innerHTML = 'A Wordle clone in vanilla JS by <a href="https://github.com/Filippo-b">Filippo Bristot</a>'
   header.insertAdjacentElement('afterbegin', subtitle)
   header.insertAdjacentElement('afterbegin', title)
 
@@ -181,14 +178,14 @@ function createHeader() {
    */
   const cheat = document.createElement('p')
   cheat.textContent = 'Cheat'
+  cheat.id = 'cheatMenu'
 
   cheat.style.textDecoration = 'underline'
   cheat.style.cursor = 'pointer'
 
   cheat.addEventListener('click', () => {
-    if (cheat.textContent !== WORD) {
-
-      cheat.textContent = capitalize(WORD) + ' 😜'
+    if (cheat.textContent !== gameObj.word) {
+      cheat.textContent = capitalize(gameObj.word) + ' 😜'
       cheat.style.textDecoration = 'unset'
     }
 
@@ -201,6 +198,16 @@ function createHeader() {
   about.style.textDecoration = 'underline'
   about.style.cursor = 'pointer'
 
+  const newGame = document.createElement('p')
+  newGame.textContent = 'New game'
+  newGame.style.textDecoration = 'underline'
+  newGame.style.cursor = 'pointer'
+
+  newGame.addEventListener('click', () => {
+    startNewGame()
+  })
+
+  menu.insertAdjacentElement('beforeend', newGame)
   menu.insertAdjacentElement('beforeend', cheat)
   menu.insertAdjacentElement('beforeend', about)
   header.insertAdjacentElement('beforeend', menu)
@@ -254,6 +261,7 @@ function generateGrid() {
     wordleContainer.insertAdjacentElement('beforeend', row)
 
     for (let j = 0; j < COLS; j++) {
+      const currentLetter = gameObj.wordTracker[i][j]
       const box = document.createElement('div')
       box.style.width = '100%'
       box.style.height = '100%'
@@ -263,8 +271,11 @@ function generateGrid() {
       box.style.alignItems = 'center'
       box.style.textTransform = 'uppercase'
       box.style.fontSize = '2rem'
+      box.style.backgroundColor = boxBackgroundColor(currentLetter, j);
+      box.style.borderColor = boxBackgroundColor(currentLetter, j);
+      keys[currentLetter] = updateLetterInKeyboardObject(currentLetter, j)
 
-      box.textContent = wordTracker[i][j]
+      box.textContent = currentLetter
       box.setAttribute('data-box', `${i},${j}`)
       row.insertAdjacentElement('beforeend', box)
     }
@@ -276,14 +287,6 @@ generateGrid()
 /* ============================================ */
 /* ··········································· § Keyboard ··· */
 /* ======================================== */
-/**
- * This object contains all the letters that goes in the keyboard and their status (present, not-present, etc).
- */
-const keys = {
-  'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
-  ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
-  'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
-}
 
 /**
  * Returns the appropriate css color based on the current letter status
@@ -371,7 +374,7 @@ function keyboardClickEvent() {
 
     if (key) {
       if (key === 'enter') {
-        const currentWord = wordTracker[CURRENT_ROW].join('')
+        const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
         boxFeedback(checkWord(currentWord))
       } else if (key === 'back') {
         removeLetter()
@@ -389,13 +392,14 @@ keyboardClickEvent()
 /* ======================================== */
 /**
  * Adds a letter to the first empty box of the active row.
+ * @param {string} letter - The letter to add.
  */
 function addLetter(letter) {
-  const firstEmptySpace = wordTracker[CURRENT_ROW].indexOf('')
+  const firstEmptySpace = gameObj.wordTracker[gameObj.currentRow].indexOf('')
 
   if (firstEmptySpace !== -1) {
-    wordTracker[CURRENT_ROW][firstEmptySpace] = letter
-    const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${firstEmptySpace}"]`)
+    gameObj.wordTracker[gameObj.currentRow][firstEmptySpace] = letter
+    const boxElement = document.querySelector(`[data-box="${gameObj.currentRow},${firstEmptySpace}"]`)
     boxElement.textContent = letter.toUpperCase()
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-tone-3')}`
     boxElement.animate(addLetterFeedbackAnimation, 50)
@@ -406,11 +410,11 @@ function addLetter(letter) {
  * Removes the last letter of the active row.
  */
 function removeLetter() {
-  const lastLetter = wordTracker[CURRENT_ROW].findLastIndex(l => l !== '')
+  const lastLetter = gameObj.wordTracker[gameObj.currentRow].findLastIndex(l => l !== '')
 
   if (lastLetter !== -1) {
-    wordTracker[CURRENT_ROW][lastLetter] = ''
-    const boxElement = document.querySelector(`[data-box="${CURRENT_ROW},${lastLetter}"]`)
+    gameObj.wordTracker[gameObj.currentRow][lastLetter] = ''
+    const boxElement = document.querySelector(`[data-box="${gameObj.currentRow},${lastLetter}"]`)
     boxElement.textContent = ''
     boxElement.style.border = `2px solid ${getColorFromCSSVar('--color-absent')}`
   }
@@ -425,7 +429,7 @@ function checkWord(word) {
   word = word.trim()
   if (typeof (word) !== 'string') throw Error('word must be a string.')
 
-  if (word === WORD) return tokenIs.correct
+  if (word === gameObj.word) return tokenIs.correct
   if (wordleLa.has(word) || wordleTa.has(word)) return tokenIs.present
   if (word.length < 5) return tokenIs.tooShort
   else return tokenIs.notPresent
@@ -438,18 +442,25 @@ function checkWord(word) {
  * @returns {string} - The color.
  */
 function boxBackgroundColor(letter, i) {
-  if (WORD[i] === letter) return getColorFromCSSVar('--color-correct')
-  if (WORD.includes(letter)) return getColorFromCSSVar('--color-present')
-  return getColorFromCSSVar('--color-absent')
+  if (letter !== '') {
+    if (gameObj.word[i] === letter) return getColorFromCSSVar('--color-correct')
+    if (gameObj.word.includes(letter)) return getColorFromCSSVar('--color-present')
+    return getColorFromCSSVar('--color-absent')
+  }
 }
 
 /**
  * Updates the keys object with the current status for every key.
+ * @param {string} letter - The letter to check.
+ * @param {number} i - The index.   
  */
 function updateLetterInKeyboardObject(letter, i) {
-  if (WORD[i] === letter) return tokenIs.correct
-  if (WORD.includes(letter)) return tokenIs.present
-  return tokenIs.notPresent
+  if (keys[letter] !== tokenIs.correct) {
+    if (gameObj.word[i] === letter) return tokenIs.correct
+    if (gameObj.word.includes(letter)) return tokenIs.present
+    return tokenIs.notPresent
+  }
+  return tokenIs.correct
 }
 
 /**
@@ -457,18 +468,18 @@ function updateLetterInKeyboardObject(letter, i) {
  * @param {string} wordStatus - Whether the word is correct, present or not present
  */
 async function boxFeedback(wordStatus) {
-  GAME_STATE = 'WAIT'
-  const currentRowEl = document.querySelector(`[data-row="${CURRENT_ROW}"`)
+  gameObj.gameState = 'WAIT'
+  const currentRowEl = document.querySelector(`[data-row="${gameObj.currentRow}"`)
   const boxes = currentRowEl.querySelectorAll('div')
   const messagesCount = Array.from(notificationContainer.querySelectorAll('.message')).length
 
   if (wordStatus === tokenIs.notPresent) {
     currentRowEl.animate(shakingAnimation, 300)
     addAndRemoveNotification('Not in word list')
-    GAME_STATE = 'PLAY'
+    gameObj.gameState = 'PLAY'
   } else if (wordStatus === tokenIs.tooShort) {
     currentRowEl.animate(shakingAnimation, 300)
-    GAME_STATE = 'PLAY'
+    gameObj.gameState = 'PLAY'
 
     // Prevents adding too many notifications.
     if (messagesCount <= 10) {
@@ -520,7 +531,7 @@ async function boxFeedback(wordStatus) {
       }
 
       setTimeout(animateSuccess, 500)
-      GAME_STATE = 'END';
+      gameObj.gameState = 'END';
     }
 
     boxes.forEach((box, i) => {
@@ -533,18 +544,21 @@ async function boxFeedback(wordStatus) {
 
     generateKeyboard(keys)
 
-    const isLastRow = CURRENT_ROW === ROWS - 1
+    const isLastRow = gameObj.currentRow === ROWS - 1
 
-    if (isLastRow) {
-      if (wordStatus === tokenIs.present) {
-        addAndRemoveNotification(capitalize(WORD), true)
+    if (gameObj.gameState !== 'END') {
+      if (isLastRow) {
+        if (wordStatus === tokenIs.present) {
+          addAndRemoveNotification(capitalize(gameObj.word), true)
+        }
+
+        gameObj.gameState = 'END'
+      } else {
+        gameObj.currentRow++
+        gameObj.gameState = 'PLAY'
       }
-
-      GAME_STATE = 'END'
-    } else {
-      CURRENT_ROW++
-      GAME_STATE = 'PLAY'
     }
+    saveGameObjToLS(gameObj)
   }
 }
 
@@ -557,7 +571,7 @@ async function boxFeedback(wordStatus) {
 function createNotificationContainer() {
   const modal = document.createElement('div')
   modal.style.position = 'absolute'
-  modal.style.top = '70px'
+  modal.style.top = '120px'
   modal.style.width = '100%'
   modal.style.display = 'flex'
   modal.style.flexDirection = 'column'
@@ -638,12 +652,34 @@ function removeNotifications() {
   removeMessagesInSequence(i)
 }
 
+/**
+ * Reset the current game and start a new one.
+ */
+function startNewGame() {
+  keys = {
+    'q': '', 'w': '', 'e': '', 'r': '', 't': '', 'y': '', 'u': '', 'i': '', 'o': '', 'p': '',
+    ' ': '', 'a': '', 's': '', 'd': '', 'f': '', 'g': '', 'h': '', 'j': '', 'k': '', 'l': '', ' ': '',
+    'enter': '', 'z': '', 'x': '', 'c': '', 'v': '', 'b': '', 'n': '', 'm': '', 'back': ''
+  }
+  addCleanGameObjToLS()
+  gameObj = getGameObjFromLS()
+  document.getElementById('wordleContainer').innerHTML = ''
+  document.getElementById('keyboardContainer').innerHTML = ''
+  const cheatMenu = document.getElementById('cheatMenu')
+  cheatMenu.textContent = 'Cheat'
+  cheatMenu.style.textDecoration = 'underline'
+  document.getElementById('notificationContainer').innerHTML = ''
+
+  generateGrid()
+  generateKeyboard(keys)
+}
+
 /* ============================================ */
 /* ··········································· § TYPING ··· */
 /* ======================================== */
 /**
  * Check wether the modifier keys are pressed.
- * @return true of shift, cmd, ctrl or alt are pressed, false otherwise.
+ * @return {Boolean} true of shift, cmd, ctrl or alt are pressed, false otherwise.
  */
 function modifierState(e) {
   return !e.altKey
@@ -654,17 +690,49 @@ function modifierState(e) {
 
 window.addEventListener('keydown', (e) => {
   // console.log(e.key)
-  if (GAME_STATE === 'PLAY' && modifierState(e)) {
+  if (gameObj.gameState === 'PLAY' && modifierState(e)) {
     if (isValidLetter(e.key)) {
       addLetter(e.key)
     } else if (e.key === 'Backspace') {
-      removeLetter(e)
+      removeLetter()
     } else if (e.key === 'Enter') {
-      const currentWord = wordTracker[CURRENT_ROW].join('')
+      const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
       boxFeedback(checkWord(currentWord))
     }
   }
 })
+
+/* ============================================ */
+/* ··········································· § LOCALSTORAGE ··· */
+/* ======================================== */
+/**
+ * Gets the game object from local storage.
+ */
+function getGameObjFromLS() {
+  return JSON.parse(window.localStorage.getItem('gameObj'))
+}
+
+/**
+ * Saves the game object to local storage.
+ * @param {Object} gameObj - The game object to save.
+ */
+function saveGameObjToLS(gameObj) {
+  if (!gameObj) throw new Error('No game object to save.')
+  window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
+}
+
+/**
+ * Adds a clean game object to local storage.
+ */
+function addCleanGameObjToLS() {
+  const gameObj = {
+    currentRow: 0,
+    gameState: 'PLAY',
+    word: selectRandomWord(),
+    wordTracker: generateCleanWordTracker()
+  }
+  window.localStorage.setItem('gameObj', JSON.stringify(gameObj))
+}
 
 /* ============================================ */
 /* ··········································· § UTILS ··· */
@@ -695,4 +763,12 @@ function capitalize(string) {
   const arr = string.split(' ')
   const firstCapital = arr.map(str => str[0].toUpperCase() + str.slice(1))
   return firstCapital.join(' ')
+}
+
+/**
+ * Generates a clean word tracker.
+ * @returns {Array} A clean word tracker array
+ */
+function generateCleanWordTracker() {
+  return Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => ''))
 }
