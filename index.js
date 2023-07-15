@@ -694,6 +694,7 @@ window.addEventListener('keydown', (e) => {
     if (isValidLetter(e.key)) {
       addLetter(e.key)
     } else if (e.key === 'Backspace') {
+      e.preventDefault()
       removeLetter()
     } else if (e.key === 'Enter') {
       const currentWord = gameObj.wordTracker[gameObj.currentRow].join('')
