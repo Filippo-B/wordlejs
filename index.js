@@ -14,8 +14,8 @@
  * @property {string} notPresent - the word is not present in a list
  * @property {string} tooShort - the word is less than 5 letters long
  */
-import { wordleLa } from './wordleLa.js'
-import { wordleTa } from './wordleTa.js'
+import { wordleLa } from './wordleLa.js';
+import { wordleTa } from './wordleTa.js';
 const root = document.getElementById('root');
 
 const ROWS = 6;
@@ -150,6 +150,7 @@ function createHeader() {
   header.style.display = 'flex'
   header.style.gap = '0.5rem'
   header.style.flexDirection = 'column'
+  header.style.userSelect = 'none'
   header.id = 'headerContainer'
   root.insertAdjacentElement('afterbegin', header)
   headerContainer = document.getElementById('headerContainer')
@@ -271,6 +272,7 @@ function generateGrid() {
       box.style.alignItems = 'center'
       box.style.textTransform = 'uppercase'
       box.style.fontSize = '2rem'
+      box.style.userSelect = 'none'
       box.style.backgroundColor = boxBackgroundColor(currentLetter, j);
       box.style.borderColor = boxBackgroundColor(currentLetter, j);
       keys[currentLetter] = updateLetterInKeyboardObject(currentLetter, j)
@@ -321,6 +323,7 @@ function generateKeyboard(keys) {
   keyboardContainer.style.width = '100%'
   keyboardContainer.style.maxWidth = '484px'
   keyboardContainer.style.height = '200px'
+  keyboardContainer.style.userSelect = 'none'
 
   for (let letter of keysArr) {
     const key = document.createElement('div')
